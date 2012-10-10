@@ -35,7 +35,7 @@ class course_level_tree implements renderable {
 
             $mis = new ual_mis;
 
-            $this->courses = $mis->get_user_courses_tree($USER->id);
+            $this->courses = $mis->get_user_courses_tree($USER->idnumber);
         }
     }
 }
