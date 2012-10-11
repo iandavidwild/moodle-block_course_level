@@ -68,6 +68,13 @@ class block_course_level extends block_base {
             return null;
         }
 
+        // load userdefined title and make sure it's never empty
+        if (empty($this->config->title)) {
+            $this->title = get_string('courselevel','block_course_level');
+        } else {
+            $this->title = $this->config->title;
+        }
+
         $this->content = new stdClass();
 
         $this->content->text = '';
