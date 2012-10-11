@@ -71,12 +71,23 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         foreach ($tree as $node) {
             $children = $node->get_children();
+            $parentids = $node->get_parentids();
 
             // TODO this needs to use html_writer to output
-            if($children != null) {
-                $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div> '.$this->htmllize_tree($children, $indent+1).'</li>';
+            if($children == null) {
+                // if this course has parents and indent>0 then display it.
+                if($indent>0) {
+                    $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div></li>';
+                } else {
+                    if( !isset($parentids) ) {
+                        $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div></li>';
+                    }
+                }
+
             } else {
-                $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div></li>';
+                // if this has parents OR it doesn't have parents or children then we need to display it...???
+                $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div> '.$this->htmllize_tree($children, $indent+1).'</li>';
+
             }
 
         }
