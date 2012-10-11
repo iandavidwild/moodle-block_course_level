@@ -41,17 +41,35 @@ class block_course_level_renderer extends plugin_renderer_base {
         return $this->render(new course_level_tree);
     }
 
+    /**
+     * provides the html contained in the course level block - including the tree itself and the links at the bottom
+     * of the block to 'all courses' and 'all programmes'.
+     *
+     * @param render_course_level_tree $tree
+     * @return string
+     */
     public function render_course_level_tree(course_level_tree $tree) {
+        global $CFG;
+
         $module = array('name'=>'block_course_level', 'fullpath'=>'/blocks/course_level/module.js', 'requires'=>array('yui2-treeview'));
+
         if (empty($tree) ) {
             $html = $this->output->box(get_string('nocourses', 'block_course_level'));
         } else {
+
             $htmlid = 'course_level_tree_'.uniqid();
             $this->page->requires->js_init_call('M.block_course_level.init_tree', array(false, $htmlid));
             $html = '<div id="'.$htmlid.'">';
             $html .= $this->htmllize_tree($tree->courses);
             $html .= '</div>';
         }
+
+        // Add 'View all courses' link to bottom of block...
+        $html .= html_writer::empty_tag('hr');
+        // TODO This needs to link somewhere!
+        $viewcourses_lnk = '#';
+        $attributes = array();
+        $html .= html_writer::link($viewcourses_lnk, get_string('view_all_courses', 'block_course_level'), $attributes);
 
         return $html;
     }
@@ -64,32 +82,36 @@ class block_course_level_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function htmllize_tree($tree, $indent=0) {
+        global $CFG;
+
         $yuiconfig = array();
         $yuiconfig['type'] = 'html';
 
         $result = '<ul>';
 
         foreach ($tree as $node) {
+
+            $course_shortname = $node->get_shortname();
+            $attributes = array('title'=>$course_shortname);
+            $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
+            $content = html_writer::link($moodle_url, $course_shortname, $attributes);
+            $attributes = array('yuiConfig'=>json_encode($yuiconfig));
+
             $children = $node->get_children();
             $parentids = $node->get_parentids();
 
-            // TODO this needs to use html_writer to output
             if($children == null) {
                 // if this course has parents and indent>0 then display it.
                 if($indent>0) {
-                    $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div></li>';
-                } else {
-                    if( !isset($parentids) ) {
-                        $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div></li>';
-                    }
+                    $result .= html_writer::tag('li', $content, $attributes);
+                } elseif (!isset($parentids)) {
+                    $result .= html_writer::tag('li', $content, $attributes);
                 }
 
             } else {
                 // if this has parents OR it doesn't have parents or children then we need to display it...???
-                $result .= '<li yuiConfig=\''.json_encode($yuiconfig).'\'><div>'.s($node->get_shortname()).'</div> '.$this->htmllize_tree($children, $indent+1).'</li>';
-
+                $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), $attributes);
             }
-
         }
         $result .= '</ul>';
 
