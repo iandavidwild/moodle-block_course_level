@@ -68,6 +68,8 @@ class block_course_level extends block_base {
             return null;
         }
 
+        $this->content = new stdClass();
+
         $this->content->text = '';
         $this->content->footer = '';
         if (isloggedin() && !isguestuser()) {   // Show the block
