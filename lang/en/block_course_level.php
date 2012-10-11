@@ -30,3 +30,13 @@ $string['courselevel']           = 'Course Level';
 $string['pluginname']            = 'Course Level';
 $string['nocourses']             = 'Nothing to display';
 $string['view_all_courses']      = 'View all courses';
+
+// Edit form strings
+
+$string['title']                 = 'Title';
+$string['trimmodeleft']          = 'Trim characters from the left';
+$string['trimmoderight']         = 'Trim characters from the right';
+$string['trimmodecentre']        = 'Trim characters from the centre';
+$string['trimmode']              = 'Trim mode';
+$string['trimlength']            = 'How many characters to trim to';
+
