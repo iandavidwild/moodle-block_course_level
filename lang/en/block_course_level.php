@@ -29,9 +29,9 @@
 $string['courselevel']           = 'Course Level';
 $string['pluginname']            = 'Course Level';
 $string['nocourses']             = 'Nothing to display';
-$string['view_all_courses']      = 'View all courses';
+$string['view_all_courses']      = 'Display all';
 
-// Edit form strings
+// 'Configuring a Course Level block' form strings
 
 $string['title']                 = 'Title';
 $string['trimmodeleft']          = 'Trim characters from the left';
@@ -39,4 +39,21 @@ $string['trimmoderight']         = 'Trim characters from the right';
 $string['trimmodecentre']        = 'Trim characters from the centre';
 $string['trimmode']              = 'Trim mode';
 $string['trimlength']            = 'How many characters to trim to';
+
+// 'Display all' page strings
+$string['display_all']           = 'Display all courses';
+
+// Display options available through drop-down menu:
+$string['courselist']            = 'Course list';
+$string['unit_details']          = 'Detailed';
+
+// Field headings:
+$string['shortname']             = 'Short name';
+$string['fullname']              = 'Full name';
+$string['link']                  = 'Quick link';
+$string['units']                 = 'Units';
+
+// Table links:
+$string['course_home']           = 'Course home';
+$string['years_and_units']       = 'Years and units';
 
