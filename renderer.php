@@ -33,11 +33,24 @@ require_once($CFG->dirroot . '/blocks/course_level/lib.php');
 
 class block_course_level_renderer extends plugin_renderer_base {
 
+    /** @var int Trim characters from the right */
+    const TRIM_RIGHT = 1;
+    /** @var int Trim characters from the left */
+    const TRIM_LEFT = 2;
+    /** @var int Trim characters from the center */
+    const TRIM_CENTER = 3;
+
+    private $trimmode = self::TRIM_RIGHT;
+    private $trimlength = 50;
+
     /**
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree() {
+    public function course_level_tree($trimmode, $trimlength) {
+        $this->trimmode = $trimmode;
+        $this->trimlength = $trimlength;
+
         return $this->render(new course_level_tree);
     }
 
@@ -91,7 +104,7 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         foreach ($tree as $node) {
 
-            $course_shortname = $node->get_shortname();
+            $course_shortname = $this->trim($node->get_shortname());
             $attributes = array('title'=>$course_shortname);
             $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
             $content = html_writer::link($moodle_url, $course_shortname, $attributes);
@@ -115,6 +128,42 @@ class block_course_level_renderer extends plugin_renderer_base {
         }
         $result .= '</ul>';
 
+        return $result;
+    }
+
+    /**
+     * Trims the text and shorttext properties of this node and optionally
+     * all of its children.
+     *
+     * @param string $text The text to truncate
+     * @return string
+     */
+    private function trim($text) {
+        $result = $text;
+
+        switch ($this->trimmode) {
+            case self::TRIM_RIGHT :
+                if (textlib::strlen($text)>($this->trimlength+3)) {
+                    // Truncate the text to $long characters
+                    $result = textlib::substr($text, 0, $this->trimlength).'...';
+                }
+                break;
+            case self::TRIM_LEFT :
+                if (textlib::strlen($text)>($this->trimlength+3)) {
+                    // Truncate the text to $long characters
+                    $result = '...'.textlib::substr($text, textlib::strlen($text)-$this->trimlength, $this->trimlength);
+                }
+                break;
+            case self::TRIM_CENTER :
+                if (textlib::strlen($text)>($this->trimlength+3)) {
+                    // Truncate the text to $long characters
+                    $length = ceil($this->trimlength/2);
+                    $start = textlib::substr($text, 0, $length);
+                    $end = textlib::substr($text, textlib::strlen($text)-$this->trimlength);
+                    $result = $start.'...'.$end;
+                }
+                break;
+        }
         return $result;
     }
 }
