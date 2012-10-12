@@ -27,16 +27,14 @@ class course_level_tree implements renderable {
         global $USER, $CFG;
         $this->context = get_context_instance(CONTEXT_USER, $USER->id);
 
-        // Build course level tree here...
-        $file = "{$CFG->dirroot}/local/ual_api/connection.class.php";
-
-        if (file_exists($file)) {
-            require_once($file);
-
-            $mis = new ual_mis;
+        // is ual_mis class loaded?
+        if (class_exists('ual_mis')) {
+            $mis = new ual_mis();
 
             $this->courses = $mis->get_user_courses_tree($USER->idnumber);
         }
+
+        // TODO warn if local plugin 'ual_api' is not installed.
     }
 }
 
