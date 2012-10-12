@@ -79,8 +79,8 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         // Add 'View all courses' link to bottom of block...
         $html .= html_writer::empty_tag('hr');
-        // TODO This needs to link somewhere!
-        $viewcourses_lnk = '#';
+        // TODO Need to pass sensible parameters. Hardcode them for now...
+        $viewcourses_lnk = $CFG->wwwroot.'\blocks\course_level\view.php?id=15';
         $attributes = array();
         $html .= html_writer::link($viewcourses_lnk, get_string('view_all_courses', 'block_course_level'), $attributes);
 
