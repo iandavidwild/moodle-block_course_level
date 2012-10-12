@@ -68,6 +68,17 @@ class block_course_level extends block_base {
             return null;
         }
 
+        $trimmode = 1;
+        $trimlength = 50;
+
+        if (!empty($this->config->trimmode)) {
+            $trimmode = (int)$this->config->trimmode;
+        }
+
+        if (!empty($this->config->trimlength)) {
+            $trimlength = (int)$this->config->trimlength;
+        }
+
         // load userdefined title and make sure it's never empty
         if (empty($this->config->title)) {
             $this->title = get_string('courselevel','block_course_level');
@@ -85,7 +96,7 @@ class block_course_level extends block_base {
             //TODO: add capability check here?
 
             $renderer = $this->page->get_renderer('block_course_level');
-            $this->content->text = $renderer->course_level_tree();
+            $this->content->text = $renderer->course_level_tree($trimmode, $trimlength);
             $this->content->footer = '';
 
         }
