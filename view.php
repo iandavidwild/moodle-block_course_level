@@ -107,11 +107,10 @@ if($tab == PROGRAMMES_VIEW) {
     // Viewing all programmes...
     echo '<div class="programmelist">';
 
-    // Print settings and things in a table across the top
-    
-    $controlstable = new html_table();
-    // TODO include 'search' here
-    echo html_writer::table($controlstable);
+    // Search
+    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
+    echo '<label for="search">' . get_string('programmesearch', 'block_course_level') . ' </label>';
+    echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
 
     // Define a table showing a list of all courses
     // Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
@@ -148,18 +147,16 @@ if($tab == PROGRAMMES_VIEW) {
 
     $table->initialbars(true);
 
-    // List of courses at the current visible page - paging makes it relatively short
+    $ual_mis = new ual_mis;
+    $programmelist = array();
+
+    // List of programmes at the current visible page - paging makes it relatively short
 
     // TODO this *is* too slow...
-    $ual_mis = new ual_mis;
-    $programmelist = $ual_mis->get_programme_range($table->get_page_start(), $table->get_page_size());
+    $programmelist = $ual_mis->get_programme_range($table->get_page_start(), $table->get_page_size(), $search);
 
     $totalcount = count($programmelist);
     $table->pagesize($perpage, $totalcount);
-
-    if (!empty($search)) {
-        // TODO some searching will need to be done in the result.
-    }
 
     if ($totalcount < 1) {
         echo $OUTPUT->heading(get_string('nothingtodisplay'));
@@ -206,7 +203,10 @@ if($tab == PROGRAMMES_VIEW) {
     // Viewing all courses...
     echo '<div class="courselist">';
 
-    // Print settings and things in a table across the top
+    // Search
+    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
+    echo '<label for="search">' . get_string('coursesearch', 'block_course_level') . ' </label>';
+    echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
 
     $controlstable = new html_table();
     // TODO include 'search' here
@@ -254,7 +254,7 @@ if($tab == PROGRAMMES_VIEW) {
 
     // TODO this *is* too slow...
     $ual_mis = new ual_mis;
-    $courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size());
+    $courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size(), $search);
 
     $totalcount = count($courselist);
     $table->pagesize($perpage, $totalcount);
