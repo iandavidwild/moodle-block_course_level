@@ -136,22 +136,7 @@ $table->set_control_variables(array(
 ));
 $table->setup();
 
-// Get all courses from Moodle
-// TODO getting all programmes, courses and units is the responsibility of ual_mis. Will need to be moved to local-ual_mis eventually.
-$allcourses = get_courses("all");
-
-$totalcount = count($allcourses);
-
-if (!empty($search)) {
-    // TODO some searching will need to be done in the result.
-}
-
-// we aren't worried about matching courses to some constraint so make...
-$matchcount = $totalcount;
-
 $table->initialbars(true);
-
-$table->pagesize($perpage, $matchcount);
 
 if ($sql_sort = $table->get_sql_sort()) {
     // Replace 'course_fullname' with 'fullname'
@@ -164,37 +149,45 @@ if ($sql_sort = $table->get_sql_sort()) {
 // list of courses at the current visible page - paging makes it relatively short
 // TODO this will need to be part of ual_mis implementation??? - Need to build the SQL that performs the select
 //$courselist = $DB->get_recordset_sql("$select $from $where $sort", $params, $table->get_page_start(), $table->get_page_size());
-$courselist = $DB->get_recordset_sql("SELECT * FROM  mdl_course {$sort}", NULL, $table->get_page_start(), $table->get_page_size());
+//$courselist = $DB->get_recordset_sql("SELECT * FROM  mdl_course {$sort}", NULL, $table->get_page_start(), $table->get_page_size());
 
+// TODO this might be too slow...
+$ual_mis = new ual_mis;
+$courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size());
+
+$totalcount = count($courselist);
+$table->pagesize($perpage, $totalcount);
+
+if (!empty($search)) {
+    // TODO some searching will need to be done in the result.
+}
 
 if ($totalcount < 1) {
     echo $OUTPUT->heading(get_string('nothingtodisplay'));
 } else {
 
-    if ($matchcount > 0) {
-        $coursesprinted = array();
+    $coursesprinted = array();
 
-        foreach ($courselist as $course) {
-            if (in_array($course->id, $coursesprinted)) {
-                continue;
-            }
-            $data = array();
-
-            $data[] = $course->shortname;
-            $data[] = $course->fullname;
-
-            $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id), get_string('course_home','block_course_level'));
-
-            $data[] = $link;
-
-            // TODO Link to page displaying course units??? Ask if this can be a popup???
-            $data[] = html_writer::tag('p', get_string('years_and_units', 'block_course_level'));
-
-            $table->add_data($data);
+    foreach ($courselist as $course) {
+        if (in_array($course->id, $coursesprinted)) {
+            continue;
         }
+        $data = array();
 
-        $table->print_html();
+        $data[] = $course->shortname;
+        $data[] = $course->fullname;
+
+        $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id), get_string('course_home','block_course_level'));
+
+        $data[] = $link;
+
+        // TODO Link to page displaying course units??? Ask if this can be a popup???
+        $data[] = html_writer::link(new moodle_url('\blocks\course_level\units.php?id='.$course->id), get_string('years_and_units', 'block_course_level'));
+
+        $table->add_data($data);
     }
+
+    $table->print_html();
 }
 
 $perpageurl = clone($baseurl);
@@ -203,9 +196,9 @@ if ($perpage == SHOW_ALL_PAGE_SIZE) {
     $perpageurl->param('perpage', DEFAULT_PAGE_SIZE);
     echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showperpage', '', DEFAULT_PAGE_SIZE)), array(), 'showall');
 
-} else if ($matchcount > 0 && $perpage < $matchcount) {
+} else if ($totalcount > 0 && $perpage < $totalcount) {
     $perpageurl->param('perpage', SHOW_ALL_PAGE_SIZE);
-    echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showall', '', $matchcount)), array(), 'showall');
+    echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showall', '', $totalcount)), array(), 'showall');
 }
 
 echo '</div>';  // courselist
