@@ -37,19 +37,24 @@ define('COURSE_LARGE_CLASS', 200);  // Above this is considered large
 define('DEFAULT_PAGE_SIZE', 20);
 define('SHOW_ALL_PAGE_SIZE', 5000);
 
+define('COURSES_VIEW', 0);
+define('PROGRAMMES_VIEW', 1);
+
 $page         = optional_param('page', 0, PARAM_INT);                     // which page to show
 $perpage      = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT);  // how many per page
 $search       = optional_param('search','',PARAM_RAW);                    // make sure it is processed with p() or s() when sending to output!
 
 $contextid    = optional_param('contextid', 0, PARAM_INT);                // one of this or
 $courseid     = optional_param('id', 0, PARAM_INT);                       // this are required
+$tab          = optional_param('tab', COURSES_VIEW, PARAM_INT);    // browsing either courses or programmes?
 
 $PAGE->set_url('/blocks/course_level/view.php', array(
     'page' => $page,
     'perpage' => $perpage,
     'search' => $search,
     'contextid' => $contextid,
-    'id' => $courseid));
+    'id' => $courseid,
+    'tab' => $tab));
 
 // Make sure the context is right so 1) the user knows where they are, 2) the theme renders correctly.
 if ($contextid) {
@@ -64,7 +69,6 @@ if ($contextid) {
 }
 // Not needed anymore
 unset($contextid);
-unset($courseid);
 
 require_login($course);
 
@@ -89,124 +93,234 @@ $PAGE->add_body_class('path-block-course-level-display-all'); // So we can style
 
 echo $OUTPUT->header();
 
-echo '<div class="courselist">';
+require("tabs.php");
 
 // Should use this variable so that we don't break stuff every time a variable is added or changed.
 $baseurl = new moodle_url('/blocks/course_level/view.php', array(
     'contextid' => $context->id,
     'id' => $course->id,
     'perpage' => $perpage,
+    'tab' => $tab,
     'search' => s($search)));
 
-/// Print settings and things in a table across the top
+if($tab == PROGRAMMES_VIEW) {
+    // Viewing all programmes...
+    echo '<div class="programmelist">';
 
-$controlstable = new html_table();
-// TODO include 'search' here
-// TODO include 'Filter courses A-Z' here
-echo html_writer::table($controlstable);
+    // Print settings and things in a table across the top
+    
+    $controlstable = new html_table();
+    // TODO include 'search' here
+    echo html_writer::table($controlstable);
 
-/// Define a table showing a list of all courses
-// Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
-$tablecolumns = array('shortname', 'course_fullname', 'home', 'units');
-$tableheaders = array(get_string('shortname', 'block_course_level'), get_string('fullname', 'block_course_level'),
-                        get_string('link', 'block_course_level'), get_string('units', 'block_course_level'));
+    // Define a table showing a list of all courses
+    // Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
+    $tablecolumns = array('shortname', 'course_fullname', 'home', 'courses');
+    $tableheaders = array(get_string('shortname', 'block_course_level'), get_string('fullname', 'block_course_level'),
+        get_string('link', 'block_course_level'), get_string('courses', 'block_course_level'));
 
-$table = new flexible_table('block-course-level-display-all-'.$course->id);
-$table->define_columns($tablecolumns);
-$table->define_headers($tableheaders);
-$table->define_baseurl($baseurl->out());
+    $table = new flexible_table('block-course-level-display-all-'.$course->id);
+    $table->define_columns($tablecolumns);
+    $table->define_headers($tableheaders);
+    $table->define_baseurl($baseurl->out());
 
-$table->sortable(true, 'shortname', SORT_ASC);
-$table->sortable(true, 'course_fullname', SORT_ASC);
-// Set 'no_sorting' options if necessary... e.g.
-$table->no_sorting('home');
-$table->no_sorting('units');
+    //$table->sortable(true, 'shortname', SORT_ASC);
+    //$table->sortable(true, 'course_fullname', SORT_ASC);
+    // Set 'no_sorting' options if necessary... e.g.
+    $table->no_sorting('home');
+    $table->no_sorting('courses');
+    $table->no_sorting('shortname');
+    $table->no_sorting('course_fullname');
 
-$table->set_attribute('cellspacing', '0');
-$table->set_attribute('id', 'display_all');
-$table->set_attribute('class', 'generaltable generalbox');
+    $table->set_attribute('cellspacing', '0');
+    $table->set_attribute('id', 'display_all');
+    $table->set_attribute('class', 'generaltable generalbox');
 
-$table->set_control_variables(array(
-    TABLE_VAR_SORT    => 'ssort',
-    TABLE_VAR_HIDE    => 'shide',
-    TABLE_VAR_SHOW    => 'sshow',
-    TABLE_VAR_IFIRST  => 'sifirst',
-    TABLE_VAR_ILAST   => 'silast',
-    TABLE_VAR_PAGE    => 'spage'
-));
-$table->setup();
+    $table->set_control_variables(array(
+        TABLE_VAR_SORT    => 'ssort',
+        TABLE_VAR_HIDE    => 'shide',
+        TABLE_VAR_SHOW    => 'sshow',
+        TABLE_VAR_IFIRST  => 'sifirst',
+        TABLE_VAR_ILAST   => 'silast',
+        TABLE_VAR_PAGE    => 'spage'
+    ));
+    $table->setup();
 
-$table->initialbars(true);
+    $table->initialbars(true);
 
-if ($sql_sort = $table->get_sql_sort()) {
-    // Replace 'course_fullname' with 'fullname'
-    $sql_sort = preg_replace('/course_fullname/', 'fullname', $sql_sort);
-    $sort = ' ORDER BY '.$sql_sort;
-} else {
-    $sort = '';
-}
+    // List of courses at the current visible page - paging makes it relatively short
 
-// list of courses at the current visible page - paging makes it relatively short
-// TODO this will need to be part of ual_mis implementation??? - Need to build the SQL that performs the select
-//$courselist = $DB->get_recordset_sql("$select $from $where $sort", $params, $table->get_page_start(), $table->get_page_size());
-//$courselist = $DB->get_recordset_sql("SELECT * FROM  mdl_course {$sort}", NULL, $table->get_page_start(), $table->get_page_size());
+    // TODO this *is* too slow...
+    $ual_mis = new ual_mis;
+    $programmelist = $ual_mis->get_programme_range($table->get_page_start(), $table->get_page_size());
 
-// TODO this might be too slow...
-$ual_mis = new ual_mis;
-$courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size());
+    $totalcount = count($programmelist);
+    $table->pagesize($perpage, $totalcount);
 
-$totalcount = count($courselist);
-$table->pagesize($perpage, $totalcount);
-
-if (!empty($search)) {
-    // TODO some searching will need to be done in the result.
-}
-
-if ($totalcount < 1) {
-    echo $OUTPUT->heading(get_string('nothingtodisplay'));
-} else {
-
-    $coursesprinted = array();
-
-    foreach ($courselist as $course) {
-        if (in_array($course->id, $coursesprinted)) {
-            continue;
-        }
-        $data = array();
-
-        $data[] = $course->shortname;
-        $data[] = $course->fullname;
-
-        $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id), get_string('course_home','block_course_level'));
-
-        $data[] = $link;
-
-        // TODO Link to page displaying course units??? Ask if this can be a popup???
-        $data[] = html_writer::link(new moodle_url('\blocks\course_level\units.php?id='.$course->id), get_string('years_and_units', 'block_course_level'));
-
-        $table->add_data($data);
+    if (!empty($search)) {
+        // TODO some searching will need to be done in the result.
     }
 
-    $table->print_html();
+    if ($totalcount < 1) {
+        echo $OUTPUT->heading(get_string('nothingtodisplay'));
+    } else {
+
+        $programmesprinted = array();
+
+        foreach ($programmelist as $course) {
+            if (in_array($course->id, $programmesprinted)) {
+                continue;
+            }
+            $data = array();
+
+            $data[] = $course->shortname;
+            $data[] = $course->fullname;
+
+            $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id), get_string('programme_home','block_course_level'));
+
+            $data[] = $link;
+
+            // TODO Link to page displaying programme courses??? Ask if this can be a popup???
+            $data[] = html_writer::link(new moodle_url('\blocks\course_level\courses.php?id='.$course->id), get_string('courses', 'block_course_level'));
+
+            $table->add_data($data);
+        }
+
+        $table->print_html();
+    }
+
+    $perpageurl = clone($baseurl);
+    $perpageurl->remove_params('perpage');
+    if ($perpage == SHOW_ALL_PAGE_SIZE) {
+        $perpageurl->param('perpage', DEFAULT_PAGE_SIZE);
+        echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showperpage', '', DEFAULT_PAGE_SIZE)), array(), 'showall');
+
+    } else if ($totalcount > 0 && $perpage < $totalcount) {
+        $perpageurl->param('perpage', SHOW_ALL_PAGE_SIZE);
+        echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showall', '', $totalcount)), array(), 'showall');
+    }
+
+    echo '</div>';  // programmelist
+
+} else {
+    // Viewing all courses...
+    echo '<div class="courselist">';
+
+    // Print settings and things in a table across the top
+
+    $controlstable = new html_table();
+    // TODO include 'search' here
+    echo html_writer::table($controlstable);
+
+    // Define a table showing a list of all courses
+    // Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
+    $tablecolumns = array('shortname', 'course_fullname', 'home', 'units');
+    $tableheaders = array(get_string('shortname', 'block_course_level'), get_string('fullname', 'block_course_level'),
+        get_string('link', 'block_course_level'), get_string('units', 'block_course_level'));
+
+    $table = new flexible_table('block-course-level-display-all-'.$course->id);
+    $table->define_columns($tablecolumns);
+    $table->define_headers($tableheaders);
+    $table->define_baseurl($baseurl->out());
+
+    //$table->sortable(true, 'shortname', SORT_ASC);
+    //$table->sortable(true, 'course_fullname', SORT_ASC);
+    // Set 'no_sorting' options if necessary... e.g.
+    $table->no_sorting('shortname');
+    $table->no_sorting('course_fullname');
+    $table->no_sorting('home');
+    $table->no_sorting('units');
+
+    $table->set_attribute('cellspacing', '0');
+    $table->set_attribute('id', 'display_all');
+    $table->set_attribute('class', 'generaltable generalbox');
+
+    $table->set_control_variables(array(
+        TABLE_VAR_SORT    => 'ssort',
+        TABLE_VAR_HIDE    => 'shide',
+        TABLE_VAR_SHOW    => 'sshow',
+        TABLE_VAR_IFIRST  => 'sifirst',
+        TABLE_VAR_ILAST   => 'silast',
+        TABLE_VAR_PAGE    => 'spage'
+    ));
+    $table->setup();
+
+    $table->initialbars(true);
+
+    // list of courses at the current visible page - paging makes it relatively short
+    // TODO this will need to be part of ual_mis implementation??? - Need to build the SQL that performs the select
+    //$courselist = $DB->get_recordset_sql("$select $from $where $sort", $params, $table->get_page_start(), $table->get_page_size());
+    //$courselist = $DB->get_recordset_sql("SELECT * FROM  mdl_course {$sort}", NULL, $table->get_page_start(), $table->get_page_size());
+
+    // TODO this *is* too slow...
+    $ual_mis = new ual_mis;
+    $courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size());
+
+    $totalcount = count($courselist);
+    $table->pagesize($perpage, $totalcount);
+
+    if (!empty($search)) {
+        // TODO some searching will need to be done in the result.
+    }
+
+    if ($totalcount < 1) {
+        echo $OUTPUT->heading(get_string('nothingtodisplay'));
+    } else {
+
+        $coursesprinted = array();
+
+        foreach ($courselist as $course) {
+            if (in_array($course->id, $coursesprinted)) {
+                continue;
+            }
+            $data = array();
+
+            $data[] = $course->shortname;
+            $data[] = $course->fullname;
+
+            $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id), get_string('course_home','block_course_level'));
+
+            $data[] = $link;
+
+            // TODO Link to page displaying course units??? Ask if this can be a popup???
+            $data[] = html_writer::link(new moodle_url('\blocks\course_level\units.php?id='.$course->id), get_string('years_and_units', 'block_course_level'));
+
+            $table->add_data($data);
+        }
+
+        $table->print_html();
+    }
+
+    $perpageurl = clone($baseurl);
+    $perpageurl->remove_params('perpage');
+    if ($perpage == SHOW_ALL_PAGE_SIZE) {
+        $perpageurl->param('perpage', DEFAULT_PAGE_SIZE);
+        echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showperpage', '', DEFAULT_PAGE_SIZE)), array(), 'showall');
+
+    } else if ($totalcount > 0 && $perpage < $totalcount) {
+        $perpageurl->param('perpage', SHOW_ALL_PAGE_SIZE);
+        echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showall', '', $totalcount)), array(), 'showall');
+    }
+
+    echo '</div>';  // courselist
 }
 
-$perpageurl = clone($baseurl);
-$perpageurl->remove_params('perpage');
-if ($perpage == SHOW_ALL_PAGE_SIZE) {
-    $perpageurl->param('perpage', DEFAULT_PAGE_SIZE);
-    echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showperpage', '', DEFAULT_PAGE_SIZE)), array(), 'showall');
 
-} else if ($totalcount > 0 && $perpage < $totalcount) {
-    $perpageurl->param('perpage', SHOW_ALL_PAGE_SIZE);
-    echo $OUTPUT->container(html_writer::link($perpageurl, get_string('showall', '', $totalcount)), array(), 'showall');
-}
-
-echo '</div>';  // courselist
+print_tabbed_table_end();
 
 echo $OUTPUT->footer();
 
-if ($courselist) {
-    $courselist->close();
+function print_courses_table() {
+
+
 }
+
+/**
+ * Ensure HTML is correctly formed.
+ */
+function print_tabbed_table_end() {
+    echo "</div></div>";
+}
+
 
 ?>
