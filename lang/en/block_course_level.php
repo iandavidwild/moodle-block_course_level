@@ -52,8 +52,14 @@ $string['shortname']             = 'Short name';
 $string['fullname']              = 'Full name';
 $string['link']                  = 'Quick link';
 $string['units']                 = 'Units';
+$string['courses']               = 'Courses';
+
+// Tab links:
+$string['coursesview']           = 'Courses';
+$string['programmesview']        = 'Programmes';
 
 // Table links:
 $string['course_home']           = 'Course home';
+$string['programme_home']        = 'Programme home';
 $string['years_and_units']       = 'Years and units';
 
