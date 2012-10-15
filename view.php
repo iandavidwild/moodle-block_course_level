@@ -106,7 +106,8 @@ $controlstable = new html_table();
 echo html_writer::table($controlstable);
 
 /// Define a table showing a list of all courses
-$tablecolumns = array('course_shortname', 'course_fullname', 'home', 'units');
+// Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
+$tablecolumns = array('shortname', 'course_fullname', 'home', 'units');
 $tableheaders = array(get_string('shortname', 'block_course_level'), get_string('fullname', 'block_course_level'),
                         get_string('link', 'block_course_level'), get_string('units', 'block_course_level'));
 
@@ -115,7 +116,7 @@ $table->define_columns($tablecolumns);
 $table->define_headers($tableheaders);
 $table->define_baseurl($baseurl->out());
 
-$table->sortable(true, 'course_shortname', SORT_ASC);
+$table->sortable(true, 'shortname', SORT_ASC);
 $table->sortable(true, 'course_fullname', SORT_ASC);
 // Set 'no_sorting' options if necessary... e.g.
 $table->no_sorting('home');
@@ -152,10 +153,18 @@ $table->initialbars(true);
 
 $table->pagesize($perpage, $matchcount);
 
+if ($sql_sort = $table->get_sql_sort()) {
+    // Replace 'course_fullname' with 'fullname'
+    $sql_sort = preg_replace('/course_fullname/', 'fullname', $sql_sort);
+    $sort = ' ORDER BY '.$sql_sort;
+} else {
+    $sort = '';
+}
+
 // list of courses at the current visible page - paging makes it relatively short
 // TODO this will need to be part of ual_mis implementation??? - Need to build the SQL that performs the select
 //$courselist = $DB->get_recordset_sql("$select $from $where $sort", $params, $table->get_page_start(), $table->get_page_size());
-$courselist = $DB->get_recordset_sql("SELECT * FROM  mdl_course", NULL, $table->get_page_start(), $table->get_page_size());
+$courselist = $DB->get_recordset_sql("SELECT * FROM  mdl_course {$sort}", NULL, $table->get_page_start(), $table->get_page_size());
 
 
 if ($totalcount < 1) {
