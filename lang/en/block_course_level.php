@@ -47,6 +47,10 @@ $string['display_all']           = 'Display all courses';
 $string['courselist']            = 'Course list';
 $string['unit_details']          = 'Detailed';
 
+// Search:
+$string['coursesearch']          = 'Search courses';
+$string['programmesearch']       = 'Search programmes';
+
 // Field headings:
 $string['shortname']             = 'Short name';
 $string['fullname']              = 'Full name';
