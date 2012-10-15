@@ -29,7 +29,7 @@
 $string['courselevel']           = 'Course Level';
 $string['pluginname']            = 'Course Level';
 $string['nocourses']             = 'Nothing to display';
-$string['view_all_courses']      = 'Display all';
+$string['view_all_courses']      = 'View all courses';
 
 // 'Configuring a Course Level block' form strings
 
