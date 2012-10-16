@@ -74,7 +74,7 @@ require_login($course);
 
 $systemcontext = get_context_instance(CONTEXT_SYSTEM);
 
-// Maybe it's accessed from the front paget???
+// Maybe it's accessed from the front page???
 $isfrontpage = ($course->id == SITEID);
 $frontpagectx = get_context_instance(CONTEXT_COURSE, SITEID);
 
@@ -108,7 +108,7 @@ if($tab == PROGRAMMES_VIEW) {
     echo '<div class="programmelist">';
 
     // Search
-    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
+    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" /><input type="hidden" name="tab" value="'.$tab.'" />';
     echo '<label for="search">' . get_string('programmesearch', 'block_course_level') . ' </label>';
     echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
 
@@ -123,13 +123,11 @@ if($tab == PROGRAMMES_VIEW) {
     $table->define_headers($tableheaders);
     $table->define_baseurl($baseurl->out());
 
-    //$table->sortable(true, 'shortname', SORT_ASC);
-    //$table->sortable(true, 'course_fullname', SORT_ASC);
+    $table->sortable(true, 'shortname', SORT_ASC);
+    $table->sortable(true, 'course_fullname', SORT_ASC);
     // Set 'no_sorting' options if necessary... e.g.
     $table->no_sorting('home');
     $table->no_sorting('courses');
-    $table->no_sorting('shortname');
-    $table->no_sorting('course_fullname');
 
     $table->set_attribute('cellspacing', '0');
     $table->set_attribute('id', 'display_all');
@@ -148,12 +146,28 @@ if($tab == PROGRAMMES_VIEW) {
     $table->initialbars(true);
 
     $ual_mis = new ual_mis;
-    $programmelist = array();
 
     // List of programmes at the current visible page - paging makes it relatively short
 
-    // TODO this *is* too slow...
-    $programmelist = $ual_mis->get_programme_range($table->get_page_start(), $table->get_page_size(), $search);
+    // Display ordering
+    $sort = $table->get_sql_sort();
+    if (!empty($sort)) {
+        $sort = preg_replace('/course_fullname/', 'fullname', $sort);
+        $sort = ' ORDER BY '.$sort;
+    } else {
+        $sort = '';
+    }
+
+    // Filtering courses
+    $filter = '';
+    if(!empty($search)) {
+        // Note: am assuming the course must be visible - however, this will depend on the user's capability in the current context.
+        $filter = ' AND visible=\'1\' AND (fullname LIKE \'%'.$search.'%\' OR shortname LIKE \'%'.$search.'%\')'; // This is not going to make for a very efficient query.
+    }
+
+    $programmelist = array();
+
+    $programmelist = $ual_mis->get_programme_range($table->get_page_start(), $table->get_page_size(), $filter, $sort);
 
     $totalcount = count($programmelist);
     $table->pagesize($perpage, $totalcount);
@@ -204,7 +218,7 @@ if($tab == PROGRAMMES_VIEW) {
     echo '<div class="courselist">';
 
     // Search
-    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" />';
+    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id.'" /><input type="hidden" name="tab" value="'.$tab.'" />';
     echo '<label for="search">' . get_string('coursesearch', 'block_course_level') . ' </label>';
     echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
 
@@ -223,11 +237,9 @@ if($tab == PROGRAMMES_VIEW) {
     $table->define_headers($tableheaders);
     $table->define_baseurl($baseurl->out());
 
-    //$table->sortable(true, 'shortname', SORT_ASC);
-    //$table->sortable(true, 'course_fullname', SORT_ASC);
+    $table->sortable(true, 'shortname', SORT_ASC);
+    $table->sortable(true, 'course_fullname', SORT_ASC);
     // Set 'no_sorting' options if necessary... e.g.
-    $table->no_sorting('shortname');
-    $table->no_sorting('course_fullname');
     $table->no_sorting('home');
     $table->no_sorting('units');
 
@@ -247,14 +259,27 @@ if($tab == PROGRAMMES_VIEW) {
 
     $table->initialbars(true);
 
-    // list of courses at the current visible page - paging makes it relatively short
-    // TODO this will need to be part of ual_mis implementation??? - Need to build the SQL that performs the select
-    //$courselist = $DB->get_recordset_sql("$select $from $where $sort", $params, $table->get_page_start(), $table->get_page_size());
-    //$courselist = $DB->get_recordset_sql("SELECT * FROM  mdl_course {$sort}", NULL, $table->get_page_start(), $table->get_page_size());
+    // List of courses at the current visible page - paging makes it relatively short
 
-    // TODO this *is* too slow...
     $ual_mis = new ual_mis;
-    $courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size(), $search);
+
+    // Display ordering
+    $sort = $table->get_sql_sort();
+    if (!empty($sort)) {
+        $sort = preg_replace('/course_fullname/', 'fullname', $sort);
+        $sort = ' ORDER BY '.$sort;
+    } else {
+        $sort = '';
+    }
+
+    // Filtering courses
+    $filter = '';
+    if(!empty($search)) {
+        // Note: am assuming the course must be visible - however, this will depend on the user's capability in the current context.
+        $filter = ' AND visible=\'1\' AND (fullname LIKE \'%'.$search.'%\' OR shortname LIKE \'%'.$search.'%\')'; // This is not going to make for a very efficient query.
+    }
+
+    $courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size(), $filter, $sort);
 
     $totalcount = count($courselist);
     $table->pagesize($perpage, $totalcount);
