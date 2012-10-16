@@ -42,14 +42,16 @@ class block_course_level_renderer extends plugin_renderer_base {
 
     private $trimmode = self::TRIM_RIGHT;
     private $trimlength = 50;
+    private $courseid = 0;
 
     /**
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree($trimmode, $trimlength) {
+    public function course_level_tree($trimmode, $trimlength, $courseid) {
         $this->trimmode = $trimmode;
         $this->trimlength = $trimlength;
+        $this->courseid = $courseid;
 
         return $this->render(new course_level_tree);
     }
@@ -78,9 +80,10 @@ class block_course_level_renderer extends plugin_renderer_base {
         }
 
         // Add 'View all courses' link to bottom of block...
+
+
         $html .= html_writer::empty_tag('hr');
-        // TODO Need to pass sensible parameters. Hardcode them for now...
-        $viewcourses_lnk = $CFG->wwwroot.'\blocks\course_level\view.php?id=15';
+        $viewcourses_lnk = $CFG->wwwroot.'\blocks\course_level\view.php?id='.$this->courseid;
         $attributes = array();
         $html .= html_writer::link($viewcourses_lnk, get_string('view_all_courses', 'block_course_level'), $attributes);
 
