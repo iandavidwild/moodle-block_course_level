@@ -96,7 +96,10 @@ class block_course_level extends block_base {
             //TODO: add capability check here?
 
             $renderer = $this->page->get_renderer('block_course_level');
-            $this->content->text = $renderer->course_level_tree($trimmode, $trimlength);
+
+            $parentcontext = get_context_instance_by_id($this->instance->parentcontextid);
+            $courseid = get_courseid_from_context($parentcontext);
+            $this->content->text = $renderer->course_level_tree($trimmode, $trimlength, $courseid);
             $this->content->footer = '';
 
         }
