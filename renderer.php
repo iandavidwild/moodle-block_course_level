@@ -105,28 +105,32 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         $result = '<ul>';
 
-        foreach ($tree as $node) {
+        if(empty($tree)) {
+            $result .= html_writer::tag('li', get_string('nothingtodisplay'));
+        } else {
+            foreach ($tree as $node) {
 
-            $course_shortname = $this->trim($node->get_shortname());
-            $attributes = array('title'=>$course_shortname);
-            $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
-            $content = html_writer::link($moodle_url, $course_shortname, $attributes);
-            $attributes = array('yuiConfig'=>json_encode($yuiconfig));
+                $course_shortname = $this->trim($node->get_shortname());
+                $attributes = array('title'=>$course_shortname);
+                $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
+                $content = html_writer::link($moodle_url, $course_shortname, $attributes);
+                $attributes = array('yuiConfig'=>json_encode($yuiconfig));
 
-            $children = $node->get_children();
-            $parentids = $node->get_parentids();
+                $children = $node->get_children();
+                $parentids = $node->get_parentids();
 
-            if($children == null) {
-                // if this course has parents and indent>0 then display it.
-                if($indent>0) {
-                    $result .= html_writer::tag('li', $content, $attributes);
-                } elseif (!isset($parentids)) {
-                    $result .= html_writer::tag('li', $content, $attributes);
+                if($children == null) {
+                    // if this course has parents and indent>0 then display it.
+                    if($indent>0) {
+                        $result .= html_writer::tag('li', $content, $attributes);
+                    } elseif (!isset($parentids)) {
+                        $result .= html_writer::tag('li', $content, $attributes);
+                    }
+
+                } else {
+                    // if this has parents OR it doesn't have parents or children then we need to display it...???
+                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), $attributes);
                 }
-
-            } else {
-                // if this has parents OR it doesn't have parents or children then we need to display it...???
-                $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), $attributes);
             }
         }
         $result .= '</ul>';
