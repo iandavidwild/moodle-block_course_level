@@ -217,7 +217,7 @@ if($tab == PROGRAMMES_VIEW) {
                 $data[] = get_string('nothingtodisplay');
             }
 
-            $table->add_data($data);
+            $table->add_data($data, 'row-course-'.$course->id);
         }
 
         // Load up relevant Javascript, passing the course id's of all of the course units displayed on the page...
@@ -357,7 +357,7 @@ if($tab == PROGRAMMES_VIEW) {
                 $data[] = get_string('nothingtodisplay');
             }
 
-            $table->add_data($data);
+            $table->add_data($data, 'row-course-'.$course->id);
         }
 
         // Load up relevant Javascript, passing the course id's of all of the course units displayed on the page...
