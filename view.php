@@ -191,8 +191,27 @@ if($tab == PROGRAMMES_VIEW) {
 
             $data[] = $link;
 
-            // TODO Link to page displaying programme courses??? Ask if this can be a popup???
-            $data[] = html_writer::link(new moodle_url('\blocks\course_level\courses.php?id='.$course->id), get_string('courses', 'block_course_level'));
+            // TODO IDW 18/10/12 This is not fully implemented!
+            // Output the links to this programme's courses:
+            $progcourses = $ual_mis->get_programme_courses($course->id);
+
+            if(!empty($progcourses)) {
+                $dlgTitle = html_writer::tag('div', get_string('courses', 'block_course_level'), array('class' => 'dlgTitle', 'id' => 'courses-1'));
+                $links = array(); // Start with an empty list of links
+                foreach($progcourses as $progcourse) {
+                    $links[] = html_writer::link('#', $progcourse->fullname);
+                }
+                // Implode the list of links and separate with a <br/>...
+                $contentBox = implode('<br/>', $links);
+                $contentBox = html_writer::tag('div', $contentBox, array('class' => 'contentBox'));
+
+                $cellContents = html_writer::tag('div', $dlgTitle.$contentBox, array('class' => 'yui3-overlay-loading', 'id' => 'unitoverlay-' . $course->id));
+
+                $data[] = $cellContents;
+            } else {
+                // TODO Nothing to display
+                $data[] = get_string('nothingtodisplay');
+            }
 
             $table->add_data($data);
         }
@@ -284,15 +303,13 @@ if($tab == PROGRAMMES_VIEW) {
     $totalcount = count($courselist);
     $table->pagesize($perpage, $totalcount);
 
-    if (!empty($search)) {
-        // TODO some searching will need to be done in the result.
-    }
-
     if ($totalcount < 1) {
         echo $OUTPUT->heading(get_string('nothingtodisplay'));
     } else {
 
         $coursesprinted = array();
+
+        $dlgIds = array();
 
         foreach ($courselist as $course) {
             if (in_array($course->id, $coursesprinted)) {
@@ -307,11 +324,37 @@ if($tab == PROGRAMMES_VIEW) {
 
             $data[] = $link;
 
-            // TODO Link to page displaying course units??? Ask if this can be a popup???
-            $data[] = html_writer::link(new moodle_url('\blocks\course_level\units.php?id='.$course->id), get_string('years_and_units', 'block_course_level'));
+            // Output links to this course's units:
+            $courseunits = $ual_mis->get_course_units($course->shortname);
+
+            if(!empty($courseunits) && $courseunits->valid()) {
+                $dlgId = $course->id;
+                $dlgTitle = html_writer::tag('div', get_string('years_and_units', 'block_course_level'), array('class' => 'dlgTitle', 'id' => 'units-'.$dlgId));
+                $links = array(); // Start with an empty list of links
+                foreach($courseunits as $courseunit) {
+                    $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$courseunit->id), $courseunit->fullname);
+                }
+                // Implode the list of links and separate with a <br/>...
+                $contentBox = implode('<br/>', $links);
+                $contentBox = html_writer::tag('div', $contentBox, array('class' => 'contentBox'));
+
+                $cellContents = html_writer::tag('div', $dlgTitle.$contentBox, array('class' => 'yui3-overlay-loading', 'id' => 'unitoverlay-' . $dlgId));
+
+                $data[] = $cellContents;
+
+                // Remember what all the course dialog ids are. There will be one per course...
+                $dlgIds[] = $dlgId;
+            } else {
+                $data[] = get_string('nothingtodisplay');
+            }
 
             $table->add_data($data);
         }
+
+        // Load up relevant Javascript, passing the course id's of all of the course units displayed on the page...
+        $PAGE->requires->yui_module('moodle-block_course_level-units',
+            'M.blocks_course_level.init_units',
+            array(array('unitids' => $dlgIds)));
 
         $table->print_html();
     }
@@ -329,7 +372,6 @@ if($tab == PROGRAMMES_VIEW) {
 
     echo '</div>';  // courselist
 }
-
 
 print_tabbed_table_end();
 
