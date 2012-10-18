@@ -9,8 +9,9 @@ YUI.add('moodle-block_course_level-units', function(Y) {
     Y.extend(UNITS, Y.Base, {
 
         event:null,
-        overlayevent:null,
-        overlays: [], //all the comment boxes
+        unitrowevent:null,
+        unitrowvisible: [], //true if the units are visible, else false
+        unitrows: [], //all the rows of units
 
         initializer : function(params) {
 
@@ -20,14 +21,19 @@ YUI.add('moodle-block_course_level-units', function(Y) {
                 var unitid = this.get('unitids')[i];
                 var dlgContent = Y.one('#unitoverlay-'+unitid+' .contentBox').get('innerHTML');
                 var dlgTitle = Y.one('#unitoverlay-'+unitid+' .dlgTitle').get('innerHTML');
-                this.overlays[unitid] = new M.core.dialogue({
-                    headerContent: dlgTitle,
-                    bodyContent: dlgContent,
-                    visible: false, //by default it is not displayed
-                    lightbox : true,
-                    zIndex:1000,
-                    height: '350px'
-                });
+
+                // Add a new hidden table row immediately under the current row
+                this.unitrows[unitid] = document.createElement("tr");
+                this.unitrows[unitid].setAttribute("id", "row-units-"+unitid);
+                var cellEl = document.createElement("td");
+                cellEl.setAttribute("colspan", "4");
+                cellEl.innerHTML = dlgContent;
+                this.unitrows[unitid].appendChild(cellEl);
+                this.unitrows[unitid].style.display = "none";
+                this.unitrowvisible[unitid] = false;
+
+                var referenceEl = document.getElementById("unitoverlay-"+unitid).parentNode.parentNode;
+                this.insertAfter(referenceEl, this.unitrows[unitid]);
 
                 // Remove the dialog contents. If Javascript isn't enabled then this script won't run and the
                 // list of units will be left there.
@@ -42,49 +48,32 @@ YUI.add('moodle-block_course_level-units', function(Y) {
                 element.innerHTML = dlgTitle;
                 Y.one('#unitoverlay-'+unitid).appendChild(element);
 
-                // Render and hide the new dialog.
-                this.overlays[unitid].render();
-                this.overlays[unitid].hide();
-
-                Y.one('#unitoverlay-'+unitid+' .dlgTitle').on('click', this.show, this, unitid);
+                Y.one('#unitoverlay-'+unitid+' .dlgTitle').on('click', this.unitClick, this, unitid);
             }
 
         },
 
-        show : function (e, unitid) {
+        insertAfter : function (referenceNode, newNode) {
+            referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+        },
 
-            //hide all overlays
-            for (var i=0;i<this.get('unitids').length;i++)
-            {
-                this.hide(e, this.get('unitids')[i]);
+        unitClick : function (e, unitid) {
+
+            if(this.unitrowvisible[unitid]) {
+                this.unitrows[unitid].style.display = "none"; // hide the overlay
+                this.unitrowvisible[unitid] = false;
+            } else {
+                this.unitrows[unitid].style.display = ""; // show the overlay
+                this.unitrowvisible[unitid] = true;
             }
-
-            this.overlays[unitid].show(); //show the overlay
 
             e.halt(); // we are going to attach a new 'hide overlay' event to the body,
             // because javascript always propagate event to parent tag,
             // we need to tell Yahoo to stop to call the event on parent tag
             // otherwise the hide event will be call right away.
 
-            //we add a new event on the body in order to hide the overlay for the next click
-            this.event = Y.one(document.body).on('click', this.hide, this, unitid);
-            //we add a new event on the overlay in order to hide the overlay for the next click (touch device)
-            this.overlayevent = Y.one("#unitoverlay-"+unitid).on('click', this.hide, this, unitid);
-        },
-
-        hide : function (e, unitid) {
-            this.overlays[unitid].hide(); //hide the overlay
-            if (this.event != null) {
-                this.event.detach(); //we need to detach the body hide event
-                //Note: it would work without but create js warning everytime
-                //we click on the body
-            }
-            if (this.overlayevent != null) {
-                this.overlayevent.detach(); //we need to detach the overlay hide event
-                //Note: it would work without but create js warning everytime
-                //we click on the body
-            }
-
+            // we add a new event on the overlay in order to hide the overlay for the next click (touch device)
+            this.unitrowevent = Y.one("#unitoverlay-"+unitid+' .dlgTitle').on('click', this.hide, this, unitid);
         }
 
     }, {
