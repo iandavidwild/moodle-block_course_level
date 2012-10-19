@@ -41,12 +41,19 @@ YUI.add('moodle-block_course_level-units', function(Y) {
 
                 // Replace the dialog title with a link. If Javascript isn't loaded then it will be left as a title.
                 Y.one('#unitoverlay-'+unitid+' .dlgTitle').remove();
+
                 var element = document.createElement("a");
                 element.setAttribute("href", "#"); // Don't link anywhere.
-                element.setAttribute("id", "#units-"+unitid); // Give it a unique id so we can attach a 'click' event to it.
+                element.setAttribute("id", "units-"+unitid); // Give it a unique id so we can attach a 'click' event to it.
                 element.setAttribute("class", "dlgTitle");
                 element.innerHTML = dlgTitle;
                 Y.one('#unitoverlay-'+unitid).appendChild(element);
+
+                // Specify the collapsed icon...
+                var iconEl = document.createElement("img");
+                iconEl.setAttribute("src", M.util.image_url("t/collapsed", "moodle"));
+                iconEl.setAttribute("class", "units-icon");
+                Y.one('#unitoverlay-'+unitid).appendChild(iconEl);
 
                 Y.one('#unitoverlay-'+unitid+' .dlgTitle').on('click', this.unitClick, this, unitid);
             }
@@ -62,9 +69,34 @@ YUI.add('moodle-block_course_level-units', function(Y) {
             if(this.unitrowvisible[unitid]) {
                 this.unitrows[unitid].style.display = "none"; // hide the overlay
                 this.unitrowvisible[unitid] = false;
+
+                // Change the icon:
+                Y.one('#unitoverlay-'+unitid+' .units-icon').remove();
+
+                // Specify the collapsed icon...
+                var iconEl = document.createElement("img");
+                iconEl.setAttribute("src", M.util.image_url("t/collapsed", "moodle"));
+                iconEl.setAttribute("class", "units-icon");
+                Y.one('#unitoverlay-'+unitid).appendChild(iconEl);
+
+                // make heading not bold
+                Y.one('#unitoverlay-'+unitid+' .dlgTitle').setStyle('font-weight', '');
+
             } else {
                 this.unitrows[unitid].style.display = ""; // show the overlay
                 this.unitrowvisible[unitid] = true;
+
+                // Change the icon:
+                Y.one('#unitoverlay-'+unitid+' .units-icon').remove();
+
+                // Specify the expanded icon...
+                var iconEl = document.createElement("img");
+                iconEl.setAttribute("src", M.util.image_url("t/expanded", "moodle"));
+                iconEl.setAttribute("class", "units-icon");
+                Y.one('#unitoverlay-'+unitid).appendChild(iconEl);
+
+                // make heading bold
+                Y.one('#unitoverlay-'+unitid+' .dlgTitle').setStyle('font-weight', 'bold');
             }
 
             e.halt(); // we are going to attach a new 'hide overlay' event to the body,
