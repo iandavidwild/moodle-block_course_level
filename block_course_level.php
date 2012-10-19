@@ -61,7 +61,7 @@ class block_course_level extends block_base {
 
         global $CFG, $USER, $PAGE, $OUTPUT;
 
-        if ($this->content !== NULL) {
+        if ($this->content !== null) {
             return $this->content;
         }
         if (empty($this->instance)) {
@@ -79,9 +79,9 @@ class block_course_level extends block_base {
             $trimlength = (int)$this->config->trimlength;
         }
 
-        // load userdefined title and make sure it's never empty
+        // Load userdefined title and make sure it's never empty.
         if (empty($this->config->title)) {
-            $this->title = get_string('courselevel','block_course_level');
+            $this->title = get_string('courselevel', 'block_course_level');
         } else {
             $this->title = $this->config->title;
         }
@@ -90,10 +90,10 @@ class block_course_level extends block_base {
 
         $this->content->text = '';
         $this->content->footer = '';
-        if (isloggedin() && !isguestuser()) {   // Show the block
+        if (isloggedin() && !isguestuser()) {   // Show the block.
             $this->content = new stdClass();
 
-            //TODO: add capability check here?
+            // TODO: add capability check here?
 
             $renderer = $this->page->get_renderer('block_course_level');
 

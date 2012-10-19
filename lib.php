@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -27,7 +26,7 @@ class course_level_tree implements renderable {
         global $USER, $CFG;
         $this->context = get_context_instance(CONTEXT_USER, $USER->id);
 
-        // is ual_mis class loaded?
+        // Is ual_mis class loaded?
         if (class_exists('ual_mis')) {
             $mis = new ual_mis();
 
@@ -37,5 +36,3 @@ class course_level_tree implements renderable {
         // TODO warn if local plugin 'ual_api' is not installed.
     }
 }
-
-?>

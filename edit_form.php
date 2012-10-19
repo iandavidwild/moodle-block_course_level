@@ -39,7 +39,7 @@ class block_course_level_edit_form extends block_edit_form {
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
         $mform->addElement('text', 'config_title', get_string('title', 'block_course_level'));
-        $mform->setDefault('config_title', get_string('pluginname','block_course_level'));
+        $mform->setDefault('config_title', get_string('pluginname', 'block_course_level'));
         $mform->setType('config_title', PARAM_MULTILANG);
 
         $options = array(
@@ -55,5 +55,3 @@ class block_course_level_edit_form extends block_edit_form {
         $mform->setType('config_trimlength', PARAM_INT);
     }
 }
-
-?>

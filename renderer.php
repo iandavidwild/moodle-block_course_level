@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -66,7 +65,9 @@ class block_course_level_renderer extends plugin_renderer_base {
     public function render_course_level_tree(course_level_tree $tree) {
         global $CFG;
 
-        $module = array('name'=>'block_course_level', 'fullpath'=>'/blocks/course_level/module.js', 'requires'=>array('yui2-treeview'));
+        $module = array('name'=>'block_course_level',
+                        'fullpath'=>'/blocks/course_level/module.js',
+                        'requires'=>array('yui2-treeview'));
 
         if (empty($tree) ) {
             $html = $this->output->box(get_string('nocourses', 'block_course_level'));
@@ -80,8 +81,6 @@ class block_course_level_renderer extends plugin_renderer_base {
         }
 
         // Add 'View all courses' link to bottom of block...
-
-
         $html .= html_writer::empty_tag('hr');
         $viewcourses_lnk = $CFG->wwwroot.'\blocks\course_level\view.php?id='.$this->courseid;
         $attributes = array();
@@ -105,7 +104,7 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         $result = '<ul>';
 
-        if(empty($tree)) {
+        if (empty($tree)) {
             $result .= html_writer::tag('li', get_string('nothingtodisplay'));
         } else {
             foreach ($tree as $node) {
@@ -119,16 +118,16 @@ class block_course_level_renderer extends plugin_renderer_base {
                 $children = $node->get_children();
                 $parentids = $node->get_parentids();
 
-                if($children == null) {
-                    // if this course has parents and indent>0 then display it.
-                    if($indent>0) {
+                if ($children == null) {
+                    // If this course has parents and indent>0 then display it.
+                    if ($indent>0) {
                         $result .= html_writer::tag('li', $content, $attributes);
-                    } elseif (!isset($parentids)) {
+                    } else if (!isset($parentids)) {
                         $result .= html_writer::tag('li', $content, $attributes);
                     }
 
                 } else {
-                    // if this has parents OR it doesn't have parents or children then we need to display it...???
+                    // If this has parents OR it doesn't have parents or children then we need to display it...???
                     $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), $attributes);
                 }
             }
@@ -151,19 +150,19 @@ class block_course_level_renderer extends plugin_renderer_base {
         switch ($this->trimmode) {
             case self::TRIM_RIGHT :
                 if (textlib::strlen($text)>($this->trimlength+3)) {
-                    // Truncate the text to $long characters
+                    // Truncate the text to $long characters.
                     $result = textlib::substr($text, 0, $this->trimlength).'...';
                 }
                 break;
             case self::TRIM_LEFT :
                 if (textlib::strlen($text)>($this->trimlength+3)) {
-                    // Truncate the text to $long characters
+                    // Truncate the text to $long characters.
                     $result = '...'.textlib::substr($text, textlib::strlen($text)-$this->trimlength, $this->trimlength);
                 }
                 break;
             case self::TRIM_CENTER :
                 if (textlib::strlen($text)>($this->trimlength+3)) {
-                    // Truncate the text to $long characters
+                    // Truncate the text to $long characters.
                     $length = ceil($this->trimlength/2);
                     $start = textlib::substr($text, 0, $length);
                     $end = textlib::substr($text, textlib::strlen($text)-$this->trimlength);
