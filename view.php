@@ -251,7 +251,7 @@ if($tab == PROGRAMMES_VIEW) {
     echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'.get_string('search').'" /></div></form>'."\n";
 
     $controlstable = new html_table();
-    // TODO include 'search' here
+
     echo html_writer::table($controlstable);
 
     // Define a table showing a list of all courses
