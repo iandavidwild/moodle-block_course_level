@@ -41,7 +41,7 @@ $string['trimmode']              = 'Trim mode';
 $string['trimlength']            = 'How many characters to trim to';
 
 // 'Display all' page strings
-$string['display_all']           = 'Display all courses';
+$string['display_all']           = 'All Courses and Programmes';
 
 // Display options available through drop-down menu:
 $string['courselist']            = 'Course list';
