@@ -88,6 +88,7 @@ $PAGE->set_title("$course->shortname: ".get_string('display_all', 'block_course_
 $PAGE->set_heading(get_string('display_all', 'block_course_level'));
 $PAGE->set_pagetype('course-view-' . $course->format);
 $PAGE->add_body_class('path-block-course-level-display-all'); // So we can style it independently.
+$PAGE->navbar->add(get_string('display_all', 'block_course_level'));
 
 echo $OUTPUT->header();
 
