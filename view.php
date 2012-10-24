@@ -326,7 +326,10 @@ if ($tab == PROGRAMMES_VIEW) {
         $filter = ' AND visible=\'1\' AND (fullname LIKE \'%'.$search.'%\' OR shortname LIKE \'%'.$search.'%\')';
     }
 
+    $courselist = array();
+
     $totalcount = $ual_mis->get_course_count($filter);
+
     $table->pagesize($perpage, $totalcount);
 
     $courselist = $ual_mis->get_course_range($table->get_page_start(), $table->get_page_size(), $filter, $sort);
