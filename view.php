@@ -159,7 +159,7 @@ if ($tab == PROGRAMMES_VIEW) {
         $sort = '';
     }
 
-    // Filtering courses...
+    // Filtering programmes...
     $filter = '';
     if (!empty($search)) {
         // Note: am assuming the course must be visible - however,
@@ -206,13 +206,26 @@ if ($tab == PROGRAMMES_VIEW) {
                 $dlgid = $course->id;
                 $dlgtitle = html_writer::tag('div', get_string('programme_courses', 'block_course_level'),
                                              array('class' => 'dlgTitle', 'id' => 'course-'.$dlgid));
-                $links = array(); // Start with an empty list of links.
-                foreach ($progcourses as $progcourse) {
-                    $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$progcourse->id),
-                                                                $progcourse->fullname);
+
+                $cellcontents = '';
+
+                $years = get_years_and_courses($progcourses);
+
+                $contentbox = '';
+
+                foreach($years as $year=>$component_courses) {
+                    $contentbox .= html_writer::tag('h4', get_string('year', 'block_course_level').' '.$year, array('id' => 'year_heading'));
+
+                    $links = array(); // Start with an empty list of links.
+                    foreach ($component_courses as $component_course) {
+                        $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$component_course->id),
+                                                     $component_course->shortname.' - '.$component_course->fullname,
+                                                     array('id' => 'course_link'));
+                    }
+                    // Implode the list of links and separate with a <br/>...
+                    $contentbox .= implode('<br/>', $links);
                 }
-                // Implode the list of links and separate with a <br/>...
-                $contentbox = implode('<br/>', $links);
+
                 $contentbox = html_writer::tag('div', $contentbox, array('class' => 'contentBox'));
 
                 $cellcontents = html_writer::tag('div',
@@ -360,22 +373,36 @@ if ($tab == PROGRAMMES_VIEW) {
             $courseunits = $ual_mis->get_course_units($course->shortname, '', ' ORDER BY shortname ASC');
 
             if (!empty($courseunits) && $courseunits->valid()) {
+
                 $dlgid = $course->id;
                 $dlgtitle = html_writer::tag('div', get_string('years_and_units', 'block_course_level'),
                                                                 array('class' => 'dlgTitle', 'id' => 'units-'.$dlgid));
-                $links = array(); // Start with an empty list of links.
-                foreach ($courseunits as $courseunit) {
-                    $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$courseunit->id),
-                                                                $courseunit->fullname);
+
+                $cellcontents = '';
+
+                $years = get_years_and_units($courseunits);
+
+                // Write list of years and units
+                $contentbox = '';
+                foreach($years as $year=>$units) {
+                    $contentbox .= html_writer::tag('h4', get_string('year', 'block_course_level').' '.$year, array('id' => 'year_heading'));
+
+                    $links = array(); // Start with an empty list of links.
+                    foreach ($units as $unit) {
+                        $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$unit->id),
+                                                                    $unit->shortname.' - '.$unit->fullname,
+                                                     array('id' => 'unit_link'));
+                    }
+                    // Implode the list of links and separate with a <br/>...
+                    $contentbox .= implode('<br/>', $links);
                 }
-                // Implode the list of links and separate with a <br/>...
-                $contentbox = implode('<br/>', $links);
+
                 $contentbox = html_writer::tag('div', $contentbox, array('class' => 'contentBox'));
 
-                $cellcontents = html_writer::tag('div',
-                                                 $dlgtitle.$contentbox,
-                                                 array('class' => 'yui3-overlay-loading',
-                                                       'id' => 'unitoverlay-' . $dlgid));
+                $cellcontents .= html_writer::tag('div',
+                    $dlgtitle.$contentbox,
+                    array('class' => 'yui3-overlay-loading',
+                        'id' => 'unitoverlay-' . $dlgid));
 
                 $data[] = $cellcontents;
 
@@ -425,4 +452,50 @@ echo $OUTPUT->footer();
  */
 function print_tabbed_table_end() {
     echo "</div></div>";
+}
+
+/**
+ * Returns an array of units with year as the key - sorted into ascending numeric order
+ *
+ * @param $courseunits
+ * @return array
+ */
+function get_years_and_units($courseunits) {
+    $result = array();
+
+    foreach ($courseunits as $courseunit) {
+        // Get 7th character from the left...
+        // TODO String functions are horribly inefficient so we might want to take a look at this.
+        $year = intval(substr($courseunit->shortname, -7, 1));
+
+        $result[$year][] = $courseunit;
+    }
+
+    // Ensure years are ultimately displayed in numerical ascending order
+    ksort($result, SORT_NUMERIC);
+
+    return $result;
+}
+
+/**
+ * Returns an array of courses with year as the key - sorted into ascending numeric order
+ *
+ * @param $progcourses
+ * @return array
+ */
+function get_years_and_courses($progcourses) {
+    $result = array();
+
+    foreach ($progcourses as $progcourse) {
+        // Get 7th character from the left...
+        // TODO String functions are horribly inefficient so we might want to take a look at this.
+        $year = intval(substr($progcourse->shortname, -7, 1));
+
+        $result[$year][] = $progcourse;
+    }
+
+    // Ensure years are ultimately displayed in numerical ascending order
+    ksort($result, SORT_NUMERIC);
+
+    return $result;
 }
