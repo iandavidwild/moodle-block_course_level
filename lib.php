@@ -19,6 +19,11 @@
  * This class creates a course level tree. It shows the relationship between Moodle courses - which will be specific
  * to a given institution.
  */
+
+// Fix bug: moving the block means the ual_api local plugin is no longer loaded. We'll need to specify the path to
+// the lib file directly. See https://moodle.org/mod/forum/discuss.php?d=197997 for more information...
+require_once($CFG->dirroot . '/local/ual_api/lib.php');
+
 class course_level_tree implements renderable {
     public $context;
     public $courses;
