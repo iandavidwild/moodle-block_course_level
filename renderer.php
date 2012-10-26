@@ -137,6 +137,9 @@ class block_course_level_renderer extends plugin_renderer_base {
 
                 } else {
                     // If this has parents OR it doesn't have parents or children then we need to display it...???
+                    if($indent == 0) {
+                        $attributes['class'] = 'expanded';
+                    }
                     $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), $attributes);
                 }
             }
