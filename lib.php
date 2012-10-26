@@ -35,7 +35,7 @@ class course_level_tree implements renderable {
         if (class_exists('ual_mis')) {
             $mis = new ual_mis();
 
-            $tree = $mis->get_user_courses_tree($USER->idnumber);
+            $tree = $mis->get_user_courses_tree($USER->username);
 
             $this->courses = $this->construct_view_tree($tree);
         }
