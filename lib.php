@@ -35,9 +35,62 @@ class course_level_tree implements renderable {
         if (class_exists('ual_mis')) {
             $mis = new ual_mis();
 
-            $this->courses = $mis->get_user_courses_tree($USER->idnumber);
+            $tree = $mis->get_user_courses_tree($USER->idnumber);
+
+            $this->courses = $this->construct_view_tree($tree);
         }
 
         // TODO warn if local plugin 'ual_api' is not installed.
+    }
+
+    private function construct_view_tree($tree) {
+        // The $tree is an array. This function necessarily converts this into a multidimentional array...
+
+        foreach($tree as $key=>$node) {
+            $node_shortname = $node->get_shortname();
+            if(preg_match('/^[0-9]/', $node_shortname)) { // Then this is a course not a unit
+                // Cache the node's children...
+                $units = $node->get_children();
+
+                // Then get the node to abandon them...
+                $node->abandon_children();
+
+                // Collect units into years...
+                $years = array();
+
+                foreach ($units as $unit) {
+                    // Get 7th character from the left...
+                    // TODO String functions are horribly inefficient so we might want to take a look at this.
+                    $shortname = $unit->get_shortname();
+                    $year = intval(substr($shortname, -7, 1));
+
+                    $years[$year][] = $unit;
+                }
+
+                if(!empty($years)) {
+                    foreach($years as $year=>$years_units) {
+                        $yearpage = new ual_course(array('shortname' => get_string('year', 'block_course_level').' '.$year,
+                                                         'fullname' => get_string('year', 'block_course_level').' '.$year,
+                                                         'id' => 0));
+                        $node->adopt_child($yearpage);
+
+                        foreach($years_units as $year_unit) {
+                            $yearpage->adopt_child($year_unit);
+                        }
+                    }
+                }
+
+                $homepage = new ual_course(array('shortname' => $node->get_shortname().' '.get_string('homepage', 'block_course_level'),
+                    'fullname' => $node->get_fullname(),
+                    'id' => $node->get_id()));
+
+                $node->push_child($homepage);
+            } else {
+                // Remove the reference to this node from the $tree
+                unset($tree[$key]);
+            }
+        }
+
+        return $tree;
     }
 }
