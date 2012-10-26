@@ -84,6 +84,9 @@ class course_level_tree implements renderable {
                     'fullname' => $node->get_fullname(),
                     'id' => $node->get_id()));
 
+                // Now set the id to 0 so the course isn't displayed as a link in the tree...
+                $node->set_id(0);
+
                 $node->push_child($homepage);
             } else {
                 // Remove the reference to this node from the $tree
