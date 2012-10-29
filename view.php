@@ -43,7 +43,7 @@ $perpage      = optional_param('perpage', DEFAULT_PAGE_SIZE, PARAM_INT);    // H
 // Make sure it is processed with p() or s() when sending to output!..
 $search       = optional_param('search', '', PARAM_RAW);
 $contextid    = optional_param('contextid', 0, PARAM_INT);                  // One of this or...
-$courseid     = optional_param('id', 0, PARAM_INT);                         // This is required?
+$courseid     = optional_param('id', 1, PARAM_INT);                         // Assume we're on the front page
 $tab          = optional_param('tab', COURSES_VIEW, PARAM_INT);             // Browsing either courses or programmes.
 
 $PAGE->set_url('/blocks/course_level/view.php', array(
