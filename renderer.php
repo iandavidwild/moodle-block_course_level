@@ -110,18 +110,18 @@ class block_course_level_renderer extends plugin_renderer_base {
         } else {
             foreach ($tree as $node) {
 
-                $course_shortname = $this->trim($node->get_shortname());
+                $course_fullname = $this->trim($node->get_fullname());
                 $attributes = array('id' => $indent);
                 $node_id = $node->get_id();
 
                 if($node_id == 0) {
                     $span = html_writer::tag('span', '');
-                    $content = html_writer::tag('strong', $course_shortname.$span, $attributes);
+                    $content = html_writer::tag('strong', $course_fullname.$span, $attributes);
                 } else {
                     // Create a link
-                    $attributes['title'] = $course_shortname;
+                    $attributes['title'] = $course_fullname;
                     $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
-                    $content = html_writer::link($moodle_url, $course_shortname, $attributes);
+                    $content = html_writer::link($moodle_url, $course_fullname, $attributes);
                 }
 
                 $attributes = array('yuiConfig'=>json_encode($yuiconfig));
