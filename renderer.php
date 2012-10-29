@@ -114,7 +114,8 @@ class block_course_level_renderer extends plugin_renderer_base {
                 $node_id = $node->get_id();
 
                 if($node_id == 0) {
-                    $content = html_writer::tag('strong', $course_shortname, $attributes);
+                    $span = html_writer::tag('span', '');
+                    $content = html_writer::tag('strong', $course_shortname.$span, $attributes);
                 } else {
                     // Create a link
                     $attributes['title'] = $course_shortname;
@@ -137,7 +138,7 @@ class block_course_level_renderer extends plugin_renderer_base {
 
                 } else {
                     // If this has parents OR it doesn't have parents or children then we need to display it...???
-                    if($indent == 0) {
+                    if($indent != 0) {
                         $attributes['class'] = 'expanded';
                     }
                     $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), $attributes);
