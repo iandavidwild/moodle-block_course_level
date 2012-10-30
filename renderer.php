@@ -105,9 +105,7 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         $result = '<ul>';
 
-        if (empty($tree)) {
-            $result .= html_writer::tag('li', get_string('nothingtodisplay'));
-        } else {
+        if (!empty($tree)) {
             foreach ($tree as $node) {
 
                 $course_fullname = $this->trim($node->get_fullname());
