@@ -107,11 +107,11 @@ if ($tab == PROGRAMMES_VIEW) {
     echo '<div class="programmelist">';
 
     // Search...
-    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id
+    echo '<div class="filter"><form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id
             .'" /><input type="hidden" name="tab" value="'.$tab.'" />';
     echo '<label for="search">' . get_string('programmesearch', 'block_course_level') . ' </label>';
     echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'
-            .get_string('search').'" /></div></form>'."\n";
+            .get_string('search').'" /></div></form></div>'."\n";
 
     // Define a table showing a list of all courses.
     // Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
@@ -275,11 +275,11 @@ if ($tab == PROGRAMMES_VIEW) {
     echo '<div class="courselist">';
 
     // Search...
-    echo '<form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'
+    echo '<div class="filter"><form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'
           .$course->id.'" /><input type="hidden" name="tab" value="'.$tab.'" />';
     echo '<label for="search">' . get_string('coursesearch', 'block_course_level') . ' </label>';
     echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'
-          .get_string('search').'" /></div></form>'."\n";
+          .get_string('search').'" /></div></form></div>'."\n";
 
     $controlstable = new html_table();
 
