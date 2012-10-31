@@ -83,7 +83,7 @@ class course_level_tree implements renderable {
                 }
 
                 $homepage = new ual_course(array('shortname' => $node->get_shortname().' '.get_string('homepage', 'block_course_level'),
-                    'fullname' => $node->get_fullname(),
+                    'fullname' => $node->get_fullname().' '.get_string('homepage', 'block_course_level'),
                     'id' => $node->get_id()));
 
                 // Now set the id to 0 so the course isn't displayed as a link in the tree...
