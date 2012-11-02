@@ -76,20 +76,21 @@ class course_level_tree implements renderable {
                                                          'id' => 0));
                         $node->adopt_child($yearpage);
 
+                        $year_homepage_title = get_string('year', 'block_course_level').' '.$year.' '.get_string('homepage', 'block_course_level');
+                        $year_homepage = new ual_course(array('shortname' => $year_homepage_title,
+                                                              'fullname' => $year_homepage_title,
+                                                                'id' => $node->get_id()));
+
                         foreach($years_units as $year_unit) {
                             $yearpage->adopt_child($year_unit);
                         }
                     }
                 }
 
-                $homepage = new ual_course(array('shortname' => $node->get_shortname().' '.get_string('homepage', 'block_course_level'),
-                    'fullname' => $node->get_fullname().' '.get_string('homepage', 'block_course_level'),
-                    'id' => $node->get_id()));
-
                 // Now set the id to 0 so the course isn't displayed as a link in the tree...
                 $node->set_id(0);
 
-                $node->push_child($homepage);
+                $node->push_child($year_homepage);
             } else {
                 // Remove the reference to this node from the $tree
                 unset($tree[$key]);
