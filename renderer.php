@@ -102,7 +102,11 @@ class block_course_level_renderer extends plugin_renderer_base {
             foreach ($tree as $node) {
 
                 $course_fullname = $this->trim($node->get_fullname());
+                // Fix to bug UALMOODLE-58: look for ampersand in fullname and replace it with entity
+                $course_fullname = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $course_fullname);
+
                 $attributes = array('id' => $indent);
+
                 $node_id = $node->get_id();
 
                 if($node_id == 0) {
