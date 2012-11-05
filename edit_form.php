@@ -42,6 +42,9 @@ class block_course_level_edit_form extends block_edit_form {
         $mform->setDefault('config_title', get_string('pluginname', 'block_course_level'));
         $mform->setType('config_title', PARAM_MULTILANG);
 
+        $mform->addElement('checkbox', 'config_showcode', get_string('showcode', 'block_course_level'));
+        $mform->setDefault('config_showcode', 0);
+
         $options = array(
             block_course_level::TRIM_RIGHT => get_string('trimmoderight', 'block_course_level'),
             block_course_level::TRIM_LEFT => get_string('trimmodeleft', 'block_course_level'),
