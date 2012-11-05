@@ -32,6 +32,7 @@ require_once($CFG->dirroot . '/blocks/course_level/lib.php');
 
 class block_course_level_renderer extends plugin_renderer_base {
 
+    private $showcode = 0;
     private $trimmode = block_course_level::TRIM_RIGHT;
     private $trimlength = 50;
     private $courseid = 0;
@@ -40,7 +41,8 @@ class block_course_level_renderer extends plugin_renderer_base {
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree($trimmode, $trimlength, $courseid) {
+    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid) {
+        $this->showcode = $showcode;
         $this->trimmode = $trimmode;
         $this->trimlength = $trimlength;
         $this->courseid = $courseid;
@@ -101,9 +103,12 @@ class block_course_level_renderer extends plugin_renderer_base {
         if (!empty($tree)) {
             foreach ($tree as $node) {
 
-                $course_fullname = $this->trim($node->get_fullname());
+                $name = $this->trim($node->get_fullname());
+                if($this->showcode == 1) {
+                    $name .= ' ('.$node->get_shortname().')';
+                }
                 // Fix to bug UALMOODLE-58: look for ampersand in fullname and replace it with entity
-                $course_fullname = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $course_fullname);
+                $name = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $name);
 
                 $attributes = array('id' => $indent);
 
@@ -111,12 +116,12 @@ class block_course_level_renderer extends plugin_renderer_base {
 
                 if($node_id == 0) {
                     $span = html_writer::tag('span', '');
-                    $content = html_writer::tag('strong', $course_fullname.$span, $attributes);
+                    $content = html_writer::tag('strong', $name.$span, $attributes);
                 } else {
                     // Create a link
-                    $attributes['title'] = $course_fullname;
+                    $attributes['title'] = $name;
                     $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
-                    $content = html_writer::link($moodle_url, $course_fullname, $attributes);
+                    $content = html_writer::link($moodle_url, $name, $attributes);
                 }
 
                 $attributes = array('yuiConfig'=>json_encode($yuiconfig));
