@@ -37,7 +37,7 @@ class course_level_tree implements renderable {
 
             $ual_username = $mis->get_ual_username($USER->username);
 
-            $tree = $mis->get_user_courses_tree($ual_username);
+            $tree = $mis->get_user_complete($ual_username);
 
             $this->courses = $this->construct_view_tree($tree);
         }
@@ -45,58 +45,79 @@ class course_level_tree implements renderable {
         // TODO warn if local plugin 'ual_api' is not installed.
     }
 
+
+    /**
+     * We need to perform some jiggery-pokery here because the nesting of courses isn't quite right: each year in a
+     * course has it's own course record in the database. These pages need to be collected together as 'Years'. Note
+     * this is a slightly different arrangement from that shown on page 11 of the wireframe pack.
+     *
+     * @param $tree
+     * @return mixed
+     */
     private function construct_view_tree($tree) {
-        // The $tree is an array. This function necessarily converts this into a multidimentional array...
 
+        // Construct a tree of programmes, courses and units for this user...
         foreach($tree as $key=>$node) {
-            $node_shortname = $node->get_shortname();
-            if(preg_match('/^[0-9]/', $node_shortname)) { // Then this is a course not a unit
-                // Cache the node's children...
-                $units = $node->get_children();
+            $courses = $node->get_children();
 
-                // Then get the node to abandon them...
-                $node->abandon_children();
+            if(!empty($courses)) {
 
-                // Collect units into years...
-                $years = array();
-
-                foreach ($units as $unit) {
-                    // Get 7th character from the left...
+                // Group courses by year...
+                $grouped_course_data = array();
+                foreach ($courses as $course) {
                     // TODO String functions are horribly inefficient so we might want to take a look at this.
-                    $shortname = $unit->get_shortname();
-                    $year = intval(substr($shortname, -7, 1));
+                    $aos_period = $course->get_aos_period();
 
-                    $years[$year][] = $unit;
-                }
+                    $unique_code = $course->get_unique_code();
 
-                if(!empty($years)) {
-                    foreach($years as $year=>$years_units) {
-                        $yearpage = new ual_course(array('shortname' => get_string('year', 'block_course_level').' '.$year,
-                                                         'fullname' => get_string('year', 'block_course_level').' '.$year,
-                                                         'id' => 0));
-                        $node->adopt_child($yearpage);
+                    if(strlen($aos_period) > 1) {
+                        $year = intval(substr($aos_period, -2, 1));
 
-                        $year_homepage_title = get_string('year', 'block_course_level').' '.$year.' '.get_string('homepage', 'block_course_level');
-                        $year_homepage = new ual_course(array('shortname' => $year_homepage_title,
-                                                              'fullname' => $year_homepage_title,
-                                                                'id' => $node->get_id()));
-
-                        foreach($years_units as $year_unit) {
-                            $yearpage->adopt_child($year_unit);
-                        }
+                        $grouped_course_data[$unique_code][$year] = $course;
                     }
                 }
 
-                // Now set the id to 0 so the course isn't displayed as a link in the tree...
-                $node->set_id(0);
+                if(!empty($grouped_course_data)) {
+                    // We are about to replace this node's children...
+                    $node->abandon_children();
 
-                $node->push_child($year_homepage);
-            } else {
-                // Remove the reference to this node from the $tree
-                unset($tree[$key]);
+                    foreach($grouped_course_data as $code=>$years) {
+                        // TODO We need to get the name (and link to Moodle course) from the 'course' table from the UAL api. Just use the name of the first year's homepage for now
+                        $first_year = reset($years);
+                        $coursepage = new ual_course(array('type' => ual_course::COURSETYPE_COURSE, 'shortname' => $first_year->get_shortname(), 'fullname' => $first_year->get_fullname(), 'id' => 0));
+
+                        // TODO Courses may only run for 1 year. This would be indicated by the course name as described in the 'course' table.
+                        foreach($years as $year) {
+                            $aos_period = $year->get_aos_period();
+                            if(strlen($aos_period) > 1) {
+                                $year_str = substr($aos_period, -2, 1);
+                            } else {
+                                $year_str = get_string('unknown_year', 'block_ual_mymoodle');
+                            }
+
+                            $year->set_fullname(get_string('year', 'block_ual_mymoodle').' '.$year_str);
+                            $coursepage->adopt_child($year);
+                        }
+
+                        $node->adopt_child($coursepage);
+                    }
+                }
             }
         }
 
-        return $tree;
+        // However, we just want the courses so don't return the units...
+        reset($tree);
+
+        $result = array();
+
+        foreach($tree as $key=>$node) {
+            $courses = $node->get_children();
+
+            foreach($courses as $course) {
+                $result[] = $course;
+            }
+        }
+
+        return $result;
     }
 }
