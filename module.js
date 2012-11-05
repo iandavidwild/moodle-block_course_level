@@ -26,14 +26,35 @@
 M.block_course_level = {};
 
 M.block_course_level.init_tree = function(Y, expand_all, htmlid) {
-    Y.use('yui2-treeview', function(Y) {
-        var tree = new YAHOO.widget.TreeView(htmlid);
 
-        if (expand_all) {
-            tree.expandAll();
+    Y.use('yui2-treeview', function(Y) {
+
+        // Fix to bug UALMOODLE-58: look for &amp; entity in label and replace with &. This is to fix a bug in YUI TreeView
+        function tree_traversal(node){
+            if(node.hasChildren){
+                var nodes = node.children;
+                for(var i = 0; i < nodes.length; i++)    {
+                    var test_node = nodes[i];
+                    var label = test_node.label;
+                    if(label){
+                        var decoded = label.replace(/&amp;/g, '&');
+                        test_node.label = decoded;
+                    }
+                    tree_traversal(test_node);
+                }
+            }
         }
 
-        //The tree is not created in the DOM until this method is called:
-        tree.draw();
+        // Construct the tree
+        var tree = new YAHOO.widget.TreeView(htmlid);
+
+        // Now the tree has been constructed traverse it to correct duff HTML...
+        var root = tree.getRoot();
+        var array = tree_traversal(root);
+
+        // The tree is not created in the DOM until this method is called:
+        tree.render();
     });
 };
+
+
