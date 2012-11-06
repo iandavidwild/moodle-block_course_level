@@ -332,6 +332,7 @@ if ($tab == PROGRAMMES_VIEW) {
 
     // Filtering courses...
     $filter = '';
+    $count_filter = '';
     if (!empty($search)) {
         // Note: am assuming the course must be visible.
         // However, this will depend on the user's capability in the current context.
@@ -370,7 +371,8 @@ if ($tab == PROGRAMMES_VIEW) {
             $data[] = $link;
 
             // Output links to this course's units.
-            $courseunits = $ual_mis->get_course_units($course->shortname, '', ' ORDER BY shortname ASC');
+            $course_with_wildcard = substr_replace($course->shortname, '?', -7, 1);
+            $courseunits = $ual_mis->get_course_years_units($course_with_wildcard, '', ' ORDER BY shortname ASC');
 
             if (!empty($courseunits)) {
 
