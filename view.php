@@ -362,19 +362,20 @@ if ($tab == PROGRAMMES_VIEW) {
             }
             $data = array();
 
+            $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
+                                          get_string('course_home', 'block_course_level'));
+
             $data[] = $course->shortname;
             $data[] = $course->fullname;
-
-            $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
-                                                     get_string('course_home', 'block_course_level'));
 
             $data[] = $link;
 
             // Output links to this course's units.
-            $course_with_wildcard = substr_replace($course->shortname, '?', -7, 1);
-            $courseunits = $ual_mis->get_course_years_units($course_with_wildcard, '', ' ORDER BY shortname ASC');
+            $homepage_name = substr($course->shortname, 0, 7).'???'. substr($course->shortname, -5, 5);
 
-            if (!empty($courseunits)) {
+            $courseyears = $ual_mis->get_course_years_units($homepage_name, '', ' ORDER BY shortname ASC');
+
+            if (!empty($courseyears)) {
 
                 $dlgid = $course->id;
                 $dlgtitle = html_writer::tag('div', get_string('years_and_units', 'block_course_level'),
@@ -382,12 +383,17 @@ if ($tab == PROGRAMMES_VIEW) {
 
                 $cellcontents = '';
 
-                $years = get_years_and_units($courseunits);
-
                 // Write list of years and units
                 $contentbox = '';
-                foreach($years as $year=>$units) {
-                    $contentbox .= html_writer::tag('h4', get_string('year', 'block_course_level').' '.$year, array('id' => 'year_heading'));
+                foreach($courseyears as $courseyear=>$units) {
+                    $year_homepage = $ual_mis->get_course_from_shortname($courseyear);
+                    if($year_homepage != null) {
+                        $year = intval(substr($year_homepage->shortname, -7, 1));
+                        $homepagelink = html_writer::link(new moodle_url('/course/view.php?id='.$year_homepage->id), $year_homepage->fullname.' '.get_string('year', 'block_course_level').' '.intval($year));
+                        $contentbox .= html_writer::tag('h4', $homepagelink, array('id' => 'year_heading'));
+                    } else {
+                        $contentbox .= html_writer::tag('h4', get_string('year', 'block_course_level').' '.intval($year), array('id' => 'year_heading'));
+                    }
 
                     $links = array(); // Start with an empty list of links.
                     foreach ($units as $unit) {
@@ -454,29 +460,6 @@ echo $OUTPUT->footer();
  */
 function print_tabbed_table_end() {
     echo "</div></div>";
-}
-
-/**
- * Returns an array of units with year as the key - sorted into ascending numeric order
- *
- * @param $courseunits
- * @return array
- */
-function get_years_and_units($courseunits) {
-    $result = array();
-
-    foreach ($courseunits as $courseunit) {
-        // Get 7th character from the left...
-        // TODO String functions are horribly inefficient so we might want to take a look at this.
-        $year = intval(substr($courseunit->get_shortname(), -7, 1));
-
-        $result[$year][] = $courseunit;
-    }
-
-    // Ensure years are ultimately displayed in numerical ascending order
-    ksort($result, SORT_NUMERIC);
-
-    return $result;
 }
 
 /**
