@@ -95,14 +95,16 @@ class course_level_tree implements renderable {
                             // Now need to create the course homepage...
                             $coursehome = $mis->get_course_homepage($first_year->get_shortname());
                             if($coursehome == null) {
-                                $coursehome = new ual_course(array('type' => ual_course::COURSETYPE_COURSE,
+                                $coursehome = new ual_course(array('type' => ual_course::COURSETYPE_HOMEPAGE,
                                     'shortname' => get_string('missing_homepage', 'block_course_level'),
                                     'fullname' => get_string('missing_homepage', 'block_course_level'),
                                     'id' => 0));
+                            } else {
+                                // Adjust the full name slightly
+                                $coursehome->set_fullname($coursehome->get_fullname().' '.get_string('homepage', 'block_course_level'));
                             }
 
                             $coursenode->adopt_child($coursehome);
-
 
                             // TODO Courses may only run for 1 year. This would be indicated by the course name as described in the 'course' table.
                             foreach($years as $year) {
