@@ -120,8 +120,15 @@ class block_course_level_renderer extends plugin_renderer_base {
                 } else {
                     // Create a link
                     $attributes['title'] = $name;
-                    $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
-                    $content = html_writer::link($moodle_url, $name, $attributes);
+                    // If the user is enrolled on this course then show a link...
+                    if($node->get_user_enrolled() == true) {
+                        $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
+                        $content = html_writer::link($moodle_url, $name, $attributes);
+                    } else {
+                        // Display the name but it's not clickable...
+                        // TODO make this a configuration option...
+                        $content = html_writer::tag('i', $name);
+                    }
                 }
 
                 $attributes = array('yuiConfig'=>json_encode($yuiconfig));
