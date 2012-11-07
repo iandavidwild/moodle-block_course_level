@@ -28,7 +28,7 @@ class course_level_tree implements renderable {
     public $context;
     public $courses;
     public function __construct() {
-        global $USER, $CFG;
+        global $USER;
         $this->context = get_context_instance(CONTEXT_USER, $USER->id);
 
         // Is ual_mis class loaded?
@@ -55,6 +55,7 @@ class course_level_tree implements renderable {
      * @return mixed
      */
     private function construct_view_tree($tree) {
+        global $USER;
 
         if (class_exists('ual_mis')) {
             $mis = new ual_mis();
@@ -75,6 +76,8 @@ class course_level_tree implements renderable {
 
                         if(strlen($aos_period) > 1) {
                             $year = intval(substr($aos_period, -2, 1));
+                            // TODO this is, potentially, going to hammer the database...
+                            $course->set_user_enrolled($mis->get_enrolled($USER->id, $course->get_id()));
 
                             $grouped_course_data[$unique_code][$year] = $course;
                         }
@@ -102,6 +105,8 @@ class course_level_tree implements renderable {
                             } else {
                                 // Adjust the full name slightly
                                 $coursehome->set_fullname($coursehome->get_fullname().' '.get_string('homepage', 'block_course_level'));
+                                // Is user enrolled on this course?
+                                $coursehome->set_user_enrolled($mis->get_enrolled($USER->id, $coursehome->get_id()));
                             }
 
                             $coursenode->adopt_child($coursehome);
@@ -124,6 +129,14 @@ class course_level_tree implements renderable {
                                     $coursenode->set_fullname($year_details['AOS_DESCRIPTION']);
                                 } else {
                                     $year->set_fullname(get_string('year', 'block_course_level').' '.$year_str);
+                                }
+
+                                // TODO This is foul but we need to determine if the user is enrolled on a unit or not
+                                $units = $year->get_children();
+                                if(!empty($units)) {
+                                    foreach ($units as $unit) {
+                                        $unit->set_user_enrolled($mis->get_enrolled($USER->id, $unit->get_id()));
+                                    }
                                 }
 
                                 $coursenode->adopt_child($year);
