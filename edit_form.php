@@ -35,7 +35,6 @@ class block_course_level_edit_form extends block_edit_form {
      * @param MoodleQuickForm $mform
      */
     protected function specific_definition($mform) {
-        global $CFG;
         $mform->addElement('header', 'configheader', get_string('blocksettings', 'block'));
 
         $mform->addElement('text', 'config_title', get_string('title', 'block_course_level'));
@@ -44,6 +43,9 @@ class block_course_level_edit_form extends block_edit_form {
 
         $mform->addElement('checkbox', 'config_showcode', get_string('showcode', 'block_course_level'));
         $mform->setDefault('config_showcode', 0);
+
+        $mform->addElement('checkbox', 'config_showunenrolled', get_string('showunenrolled', 'block_course_level'));
+        $mform->setDefault('config_showunenrolled', 1);
 
         $options = array(
             block_course_level::TRIM_RIGHT => get_string('trimmoderight', 'block_course_level'),
