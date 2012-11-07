@@ -87,7 +87,22 @@ class course_level_tree implements renderable {
                         foreach($grouped_course_data as $code=>$years) {
                             // TODO We need to get the name (and link to Moodle course) from the 'course' table from the UAL api. Just use the name of the first year's homepage for now
                             $first_year = reset($years);
-                            $coursepage = new ual_course(array('type' => ual_course::COURSETYPE_COURSE, 'shortname' => $first_year->get_shortname(), 'fullname' => $first_year->get_fullname(), 'id' => 0));
+                            $coursenode = new ual_course(array('type' => ual_course::COURSETYPE_COURSE,
+                                                               'shortname' => $first_year->get_shortname(),
+                                                               'fullname' => $first_year->get_fullname(),
+                                                               'id' => 0));
+
+                            // Now need to create the course homepage...
+                            $coursehome = $mis->get_course_homepage($first_year->get_shortname());
+                            if($coursehome == null) {
+                                $coursehome = new ual_course(array('type' => ual_course::COURSETYPE_COURSE,
+                                    'shortname' => get_string('missing_homepage', 'block_course_level'),
+                                    'fullname' => get_string('missing_homepage', 'block_course_level'),
+                                    'id' => 0));
+                            }
+
+                            $coursenode->adopt_child($coursehome);
+
 
                             // TODO Courses may only run for 1 year. This would be indicated by the course name as described in the 'course' table.
                             foreach($years as $year) {
@@ -95,7 +110,7 @@ class course_level_tree implements renderable {
                                 if(strlen($aos_period) > 1) {
                                     $year_str = substr($aos_period, -2, 1);
                                 } else {
-                                    $year_str = get_string('unknown_year', 'block_ual_mymoodle');
+                                    $year_str = get_string('unknown_year', 'block_course_level');
                                 }
 
                                 // Use the UAL API to get the description of the year course from the MIS
@@ -104,16 +119,15 @@ class course_level_tree implements renderable {
                                 if(!empty($year_details)) {
                                     $year->set_fullname($year_details['FULL_DESCRIPTION']);
                                     // TODO The following function needs to be called but at the moment I'm calling set_fullname() repeatedly within this loop...
-                                    $coursepage->set_fullname($year_details['AOS_DESCRIPTION']);
+                                    $coursenode->set_fullname($year_details['AOS_DESCRIPTION']);
                                 } else {
-                                    $year->set_fullname(get_string('year', 'block_ual_mymoodle').' '.$year_str);
+                                    $year->set_fullname(get_string('year', 'block_course_level').' '.$year_str);
                                 }
 
-                                $coursepage->adopt_child($year);
-
+                                $coursenode->adopt_child($year);
                             }
 
-                            $node->adopt_child($coursepage);
+                            $node->adopt_child($coursenode);
                         }
                     }
                 }
