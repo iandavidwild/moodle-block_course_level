@@ -209,22 +209,18 @@ if ($tab == PROGRAMMES_VIEW) {
 
                 $cellcontents = '';
 
-                $years = get_years_and_courses($progcourses);
-
                 $contentbox = '';
 
-                foreach($years as $year=>$component_courses) {
-                    $contentbox .= html_writer::tag('h4', get_string('year', 'block_course_level').' '.$year, array('id' => 'year_heading'));
+                $links = array(); // Start with an empty list of links.
 
-                    $links = array(); // Start with an empty list of links.
-                    foreach ($component_courses as $component_course) {
-                        $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$component_course->get_id()),
-                                                     $component_course->get_shortname().' - '.$component_course->get_fullname(),
-                                                     array('id' => 'course_link'));
-                    }
-                    // Implode the list of links and separate with a <br/>...
-                    $contentbox .= implode('<br/>', $links);
+                foreach($progcourses as $progcourse) {
+                    $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$progcourse->get_id()),
+                                                 $progcourse->get_shortname().' - '.$progcourse->get_fullname(),
+                                                 array('id' => 'course_link'));
                 }
+
+                // Implode the list of links and separate with a <br/>...
+                $contentbox .= implode('<br/>', $links);
 
                 $contentbox = html_writer::tag('div', $contentbox, array('class' => 'contentBox'));
 
