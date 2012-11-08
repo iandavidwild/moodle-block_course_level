@@ -457,26 +457,3 @@ echo $OUTPUT->footer();
 function print_tabbed_table_end() {
     echo "</div></div>";
 }
-
-/**
- * Returns an array of courses with year as the key - sorted into ascending numeric order
- *
- * @param $progcourses
- * @return array
- */
-function get_years_and_courses($progcourses) {
-    $result = array();
-
-    foreach ($progcourses as $progcourse) {
-        // Get 7th character from the left...
-        // TODO String functions are horribly inefficient so we might want to take a look at this.
-        $year = intval(substr($progcourse->get_shortname(), -7, 1));
-
-        $result[$year][] = $progcourse;
-    }
-
-    // Ensure years are ultimately displayed in numerical ascending order
-    ksort($result, SORT_NUMERIC);
-
-    return $result;
-}
