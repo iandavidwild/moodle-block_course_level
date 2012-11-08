@@ -371,9 +371,8 @@ if ($tab == PROGRAMMES_VIEW) {
             $data[] = $link;
 
             // Output links to this course's units.
-            $homepage_name = substr($course->shortname, 0, 7).'???'. substr($course->shortname, -5, 5);
-
-            $courseyears = $ual_mis->get_course_years_units($homepage_name, '', ' ORDER BY shortname ASC');
+            $course_code_no_year = substr($course->shortname, 0, 8).'?'.substr($course->shortname,-6, 6);
+            $courseyears = $ual_mis->get_course_years_units($course_code_no_year, '', ' ORDER BY shortname ASC');
 
             if (!empty($courseyears)) {
 
@@ -389,7 +388,8 @@ if ($tab == PROGRAMMES_VIEW) {
                     $year_homepage = $ual_mis->get_course_from_shortname($courseyear);
                     if($year_homepage != null) {
                         $year = intval(substr($year_homepage->shortname, -7, 1));
-                        $homepagelink = html_writer::link(new moodle_url('/course/view.php?id='.$year_homepage->id), $year_homepage->fullname.' '.get_string('year', 'block_course_level').' '.intval($year));
+                        // The course fullname should contain the 'Course years' full title (which includes which year it is)
+                        $homepagelink = html_writer::link(new moodle_url('/course/view.php?id='.$year_homepage->id), $year_homepage->fullname);
                         $contentbox .= html_writer::tag('h4', $homepagelink, array('id' => 'year_heading'));
                     } else {
                         $contentbox .= html_writer::tag('h4', get_string('year', 'block_course_level').' '.intval($year), array('id' => 'year_heading'));
