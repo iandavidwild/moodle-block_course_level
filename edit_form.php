@@ -44,9 +44,6 @@ class block_course_level_edit_form extends block_edit_form {
         $mform->addElement('checkbox', 'config_showcode', get_string('showcode', 'block_course_level'));
         $mform->setDefault('config_showcode', 0);
 
-        $mform->addElement('checkbox', 'config_showunenrolled', get_string('showunenrolled', 'block_course_level'));
-        $mform->setDefault('config_showunenrolled', 1);
-
         $options = array(
             block_course_level::TRIM_RIGHT => get_string('trimmoderight', 'block_course_level'),
             block_course_level::TRIM_LEFT => get_string('trimmodeleft', 'block_course_level'),
