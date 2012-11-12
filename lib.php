@@ -26,7 +26,10 @@ require_once($CFG->dirroot . '/local/ual_api/lib.php');
 
 class course_level_tree implements renderable {
     public $context;
-    public $courses;
+    public $courses = array();
+    public $orphaned_courses = array();
+    public $orphaned_units = array();
+
     public function __construct() {
         global $USER;
         $this->context = get_context_instance(CONTEXT_USER, $USER->id);
@@ -35,11 +38,20 @@ class course_level_tree implements renderable {
         if (class_exists('ual_mis')) {
             $mis = new ual_mis();
 
+            // The user's username could be their LDAP username or an historical username...
             $ual_username = $mis->get_ual_username($USER->username);
 
-            $tree = $mis->get_user_complete($ual_username);
+            // What units is this user enrolled on?
+            $units = $mis->get_user_units($ual_username);
 
-            $this->courses = $this->construct_view_tree($tree);
+            // What courses is this user enrolled on?
+            $courses = $mis->get_user_courses($ual_username);
+
+            // Which programmes is this user enrolled on?
+            $programmes = $mis->get_user_programmes($ual_username);
+
+            // Now make each course adopt a unit. Note that units could have more than one parent...
+            $this->courses = $this->construct_view_tree($programmes, $courses, $units);
         }
 
         // TODO warn if local plugin 'ual_api' is not installed.
@@ -54,114 +66,151 @@ class course_level_tree implements renderable {
      * @param $tree
      * @return mixed
      */
-    private function construct_view_tree($tree) {
+    private function construct_view_tree($programmes, $courses, $units) {
         global $USER;
+
+        $result = array();
 
         if (class_exists('ual_mis')) {
             $mis = new ual_mis();
 
-            // Construct a tree of programmes, courses and units for this user...
-            foreach($tree as $key=>$node) {
-                $courses = $node->get_children();
+            // Create a reference array of programmes
+            $reference_programmes = array();
+            if(!empty($programmes)) {
+                foreach($programmes as $programme) {
+                    $programme_code = $programme->get_aos_code().$programme->get_aos_period().$programme->get_acad_period();
+                    $reference_programmes[$programme_code] = $programme;
+                }
+            }
 
-                if(!empty($courses)) {
+            $orphaned_courses = array();
 
-                    // Group courses by year...
-                    $grouped_course_data = array();
-                    foreach ($courses as $course) {
-                        // TODO String functions are horribly inefficient so we might want to take a look at this.
-                        $aos_period = $course->get_aos_period();
+            // Create a reference array of courses - make each course adopt their child/children...
+            $reference_courses = array();
+            if(!empty($courses)) {
+                foreach($courses as $course) {
+                    $course_code = $course->get_aos_code().$course->get_aos_period().$course->get_acad_period();
+                    $course->set_user_enrolled($mis->get_enrolled($USER->id, $course->get_moodle_course_id()));
+                    $reference_courses[$course_code] = $course;
 
-                        $unique_code = $course->get_unique_code();
-
-                        if(strlen($aos_period) > 1) {
-                            $year = intval(substr($aos_period, -2, 1));
-                            // TODO this is, potentially, going to hammer the database...
-                            $course->set_user_enrolled($mis->get_enrolled($USER->id, $course->get_id()));
-
-                            $grouped_course_data[$unique_code][$year] = $course;
-                        }
-                    }
-
-                    if(!empty($grouped_course_data)) {
-                        // We are about to replace this node's children...
-                        $node->abandon_children();
-
-                        foreach($grouped_course_data as $code=>$years) {
-                            // TODO We need to get the name (and link to Moodle course) from the 'course' table from the UAL api. Just use the name of the first year's homepage for now
-                            $first_year = reset($years);
-                            $coursenode = new ual_course(array('type' => ual_course::COURSETYPE_COURSE,
-                                                               'shortname' => $first_year->get_shortname(),
-                                                               'fullname' => $first_year->get_fullname(),
-                                                               'id' => 0));
-
-                            // Now need to create the course homepage...
-                            $coursehome = $mis->get_course_homepage($first_year->get_shortname());
-                            if($coursehome == null) {
-                                $coursehome = new ual_course(array('type' => ual_course::COURSETYPE_HOMEPAGE,
-                                    'shortname' => get_string('missing_homepage', 'block_course_level'),
-                                    'fullname' => get_string('missing_homepage', 'block_course_level'),
-                                    'id' => 0));
-                            } else {
-                                // Adjust the full name slightly
-                                $coursehome->set_fullname($coursehome->get_fullname().' '.get_string('homepage', 'block_course_level'));
-                                // Is user enrolled on this course?
-                                $coursehome->set_user_enrolled($mis->get_enrolled($USER->id, $coursehome->get_id()));
-                            }
-
-                            $coursenode->adopt_child($coursehome);
-
-                            // TODO Courses may only run for 1 year. This would be indicated by the course name as described in the 'course' table.
-                            foreach($years as $year) {
-                                $aos_period = $year->get_aos_period();
-                                if(strlen($aos_period) > 1) {
-                                    $year_str = substr($aos_period, -2, 1);
-                                } else {
-                                    $year_str = get_string('unknown_year', 'block_course_level');
-                                }
-
-                                // Use the UAL API to get the description of the year course from the MIS
-                                $year_details = $mis->get_course_details($year->get_shortname());
-
-                                if(!empty($year_details)) {
-                                    $year->set_fullname($year_details['FULL_DESCRIPTION']);
-                                    // TODO The following function needs to be called but at the moment I'm calling set_fullname() repeatedly within this loop...
-                                    $coursenode->set_fullname($year_details['AOS_DESCRIPTION']);
-                                } else {
-                                    $year->set_fullname(get_string('year', 'block_course_level').' '.$year_str);
-                                }
-
-                                // TODO This is foul but we need to determine if the user is enrolled on a unit or not
-                                $units = $year->get_children();
-                                if(!empty($units)) {
-                                    foreach ($units as $unit) {
-                                        $unit->set_user_enrolled($mis->get_enrolled($USER->id, $unit->get_id()));
-                                    }
-                                }
-
-                                $coursenode->adopt_child($year);
-                            }
-
-                            $node->adopt_child($coursenode);
+                    // Is this course an orphan?
+                    if(strlen($course->get_parent()) == 0) {
+                        $orphaned_courses[] = $course;
+                    } else {
+                        $parent = $reference_programmes[$course->get_parent()];
+                        if(!empty($parent)) {
+                            $parent->adopt_child($course);
                         }
                     }
                 }
             }
-        }
 
-        // However, we just want the courses so don't return the units...
-        reset($tree);
+            $orphaned_units = array();
 
-        $result = array();
+            // Create a reference array of units
+            $reference_units = array();
+            if(!empty($units)) {
+                foreach($units as $unit) {
+                    $unit_code = $unit->get_aoscd_link().$unit->get_lnk_aos_period().$unit->get_lnk_period();
+                    $unit->set_user_enrolled($mis->get_enrolled($USER->id, $unit->get_moodle_course_id()));
+                    $reference_units[$unit_code] = $unit;
 
-        foreach($tree as $key=>$node) {
-            $courses = $node->get_children();
-
-            foreach($courses as $course) {
-                $result[] = $course;
+                    // Is this unit an orphan?
+                    if(strlen($unit->get_parent()) == 0) {
+                        $orphaned_units[] = $unit;
+                    } else {
+                        $parent = $reference_courses[$unit->get_parent()];
+                        if(!empty($parent)) {
+                            $parent->adopt_child($unit);
+                        }
+                    }
+                }
             }
+
+            //Now we have a relationship between courses and programmes... BUT we need to include the 'Course (all years)' level in the tree...
+            if(!empty($reference_programmes)) {
+
+                foreach($reference_programmes as $reference_programme) {
+                    $course_years = $reference_programme->get_children();
+                    $new_courses = $this->get_years_from_courses($course_years);
+
+                    // Some orphaned courses may be the 'Course (all years)' homepages. If they are then we need to delete them
+                    foreach($orphaned_courses as $elementkey=>$orphaned_course) {
+                        foreach($new_courses as $course) {
+                            $orphaned_course_id = $orphaned_course->get_idnumber();
+                            $course_id = $course->get_idnumber();
+                            if(strcmp($orphaned_course_id, $course_id) == 0) {
+                                $course->set_fullname($orphaned_course->get_fullname());
+                                $course->set_shortname($orphaned_course->get_shortname());
+                                $course->set_idnumber($orphaned_course->get_idnumber());
+                                $course->set_moodle_course_id($orphaned_course->get_moodle_course_id());
+                                $course->set_user_enrolled($orphaned_course->get_user_enrolled());
+                                unset($orphaned_courses[$elementkey]);
+                            }
+                        }
+                    }
+
+                    if(!empty($new_courses)) {
+                        $reference_programme->abandon_children();
+                        foreach($new_courses as $new_course) {
+                            $reference_programme->adopt_child($new_course);
+                            // Add link to course homepage...
+                            $homepage = clone $new_course;
+                            $homepage->set_fullname($homepage->get_fullname().' '.get_string('homepage', 'block_course_level'));
+                            $homepage->abandon_children();
+                            $new_course->push_child($homepage);
+                            $new_course->set_moodle_course_id(0); // This ensures the course name is displayed in bold with no link.
+                        }
+                    }
+                }
+            }
+
+            // Construct an array of courses, including orphaned courses and orphaned units:
+            foreach($reference_programmes as $reference_programme) {
+                $courses = $reference_programme->get_children();
+                if(!empty($courses)) {
+                    foreach($courses as $course) {
+                        $result[] = $course;
+                    }
+                }
+            }
+
+            // Need to do something with orphaned courses and units...
+            $this->orphaned_courses = $orphaned_courses;
+            $this->orphaned_units = $orphaned_units;
         }
 
         return $result;
     }
+
+    private function get_years_from_courses($course_years) {
+        $result = array();
+
+        $grouped_courses = array();
+
+        if(!empty($course_years)) {
+            // Group courses by year
+
+            foreach($course_years as $course_year) {
+                $course_name = $course_year->get_aos_code().substr($course_year->get_aos_period(),0,2).$course_year->get_acad_period();
+
+                $grouped_courses[$course_name][] = $course_year;
+            }
+
+            if(!empty($grouped_courses)) {
+                foreach($grouped_courses as $course_year => $courses) {
+
+                    // Make new course for 'Course (all years)' level - this information needs to come from the API but construct it manually for now...
+                    $new_course = new ual_course(array('fullname' => $course_year, 'idnumber' => $course_year));
+                    foreach($courses as $course) {
+                        $new_course->adopt_child($course);
+                    }
+                    $result[] = $new_course;
+                }
+            }
+        }
+
+        return ($result);
+    }
 }
+
