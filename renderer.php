@@ -105,14 +105,14 @@ class block_course_level_renderer extends plugin_renderer_base {
 
                 $name = $this->trim($node->get_fullname());
                 if($this->showcode == 1) {
-                    $name .= ' ('.$node->get_shortname().')';
+                    $name .= ' ('.$node->get_idnumber().')';
                 }
                 // Fix to bug UALMOODLE-58: look for ampersand in fullname and replace it with entity
                 $name = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $name);
 
                 $attributes = array('id' => $indent);
 
-                $node_id = $node->get_id();
+                $node_id = $node->get_moodle_course_id();
 
                 if($node_id == 0) {
                     $span = html_writer::tag('span', '');
@@ -122,7 +122,7 @@ class block_course_level_renderer extends plugin_renderer_base {
                     $attributes['title'] = $name;
                     // If the user is enrolled on this course then show a link...
                     if($node->get_user_enrolled() == true) {
-                        $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_id();
+                        $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
                         $content = html_writer::link($moodle_url, $name, $attributes);
                     } else {
                         // Display the name but it's not clickable...
@@ -134,13 +134,13 @@ class block_course_level_renderer extends plugin_renderer_base {
                 $attributes = array('yuiConfig'=>json_encode($yuiconfig));
 
                 $children = $node->get_children();
-                $parentids = $node->get_parentids();
+                $parents = $node->get_parents();
 
                 if ($children == null) {
                     // If this course has parents and indent>0 then display it.
                     if ($indent>0) {
                         $result .= html_writer::tag('li', $content, $attributes);
-                    } else if (!isset($parentids)) {
+                    } else if (!empty($parents)) {
                         $result .= html_writer::tag('li', $content, $attributes);
                     }
 
