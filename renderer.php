@@ -75,6 +75,72 @@ class block_course_level_renderer extends plugin_renderer_base {
             $html .= '</div>';
         }
 
+        if(!empty($tree->orphaned_courses)) {
+            // Display orphaned courses at bottom of block...
+
+            $html .= html_writer::empty_tag('hr');
+
+
+            $orphaned_courses_list = html_writer::tag('h4', get_string('orphaned_courses', 'block_course_level'));
+            $attributes = array('id' => 'orphaned-courses-heading');
+            $orphaned_courses_list = html_writer::tag('div', $orphaned_courses_list, $attributes);
+
+            $orphaned_courses_list .= html_writer::start_tag('ul');
+
+            foreach($tree->orphaned_courses as $orphaned_course) {
+                $name = $this->trim($orphaned_course->get_fullname());
+                if($this->showcode == 1) {
+                    $name .= ' ('.$orphaned_course->get_idnumber().')';
+                }
+                // Fix to bug UALMOODLE-58: look for ampersand in fullname and replace it with entity
+                $name = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $name);
+
+                $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$orphaned_course->get_moodle_course_id();
+                $content = html_writer::link($moodle_url, $name, $attributes);
+                $orphaned_courses_list .= html_writer::tag('li', $content, $attributes);
+
+            }
+            $orphaned_courses_list .= html_writer::end_tag('ul');
+
+            $attributes = array('class' => 'orphaned-courses');
+            $orphaned_courses_list = html_writer::tag('div', $orphaned_courses_list, $attributes);
+
+            $html .= $orphaned_courses_list;
+        }
+
+        if(!empty($tree->orphaned_units)) {
+            // Display orphaned units at bottom of block...
+
+            $html .= html_writer::empty_tag('hr');
+
+            $orphaned_units_list = html_writer::tag('h4', get_string('orphaned_units', 'block_course_level'));
+            $attributes = array('id' => 'orphaned-units-heading');
+            $orphaned_units_list = html_writer::tag('div', $orphaned_units_list, $attributes);
+
+            $orphaned_units_list .= html_writer::start_tag('ul');
+
+            foreach($tree->orphaned_units as $orphaned_unit) {
+                $name = $this->trim($orphaned_unit->get_fullname());
+                if($this->showcode == 1) {
+                    $name .= ' ('.$orphaned_unit->get_idnumber().')';
+                }
+                // Fix to bug UALMOODLE-58: look for ampersand in fullname and replace it with entity
+                $name = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $name);
+
+                $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$orphaned_unit->get_moodle_course_id();
+                $content = html_writer::link($moodle_url, $name, $attributes);
+                $orphaned_units_list .= html_writer::tag('li', $content, $attributes);
+
+            }
+            $orphaned_units_list .= html_writer::end_tag('ul');
+
+            $attributes = array('class' => 'orphaned-courses');
+            $orphaned_units_list = html_writer::tag('div', $orphaned_units_list, $attributes);
+
+            $html .= $orphaned_units_list;
+        }
+
+
         // Add 'View all courses' link to bottom of block...
         $html .= html_writer::empty_tag('hr');
         $viewcourses_lnk = $CFG->wwwroot.'/blocks/course_level/view.php?id='.$this->courseid;
