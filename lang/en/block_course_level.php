@@ -44,6 +44,10 @@ $string['trimlength']            = 'How many characters to trim to';
 // 'Display all' page strings
 $string['display_all']           = 'All Courses and Programmes';
 
+// Orphaned courses and units
+$string['orphaned_courses']      = 'Orphaned Courses';
+$string['orphaned_units']        = 'Orphaned Units';
+
 // Display options available through drop-down menu:
 $string['courselist']            = 'Course list';
 $string['unit_details']          = 'Detailed';
