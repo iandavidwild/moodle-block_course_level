@@ -79,6 +79,7 @@ class course_level_tree implements renderable {
             if(!empty($programmes)) {
                 foreach($programmes as $programme) {
                     $programme_code = $programme->get_aos_code().$programme->get_aos_period().$programme->get_acad_period();
+                    // We don't have to worry about a user being enrolled on a programme as this information isn't displayed.
                     $reference_programmes[$programme_code] = $programme;
                 }
             }
