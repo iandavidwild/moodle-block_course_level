@@ -80,7 +80,6 @@ class block_course_level_renderer extends plugin_renderer_base {
 
             $html .= html_writer::empty_tag('hr');
 
-
             $orphaned_courses_list = html_writer::tag('h4', get_string('orphaned_courses', 'block_course_level'));
             $attributes = array('id' => 'orphaned-courses-heading');
             $orphaned_courses_list = html_writer::tag('div', $orphaned_courses_list, $attributes);
