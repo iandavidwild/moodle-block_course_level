@@ -160,7 +160,6 @@ class course_level_tree implements renderable {
                             $homepage->set_fullname($homepage->get_fullname().' '.get_string('homepage', 'block_course_level'));
                             $homepage->abandon_children();
                             $new_course->push_child($homepage);
-                            $new_course->set_moodle_course_id(0); // This ensures the course name is displayed in bold with no link.
                         }
                     }
                 }
@@ -176,7 +175,17 @@ class course_level_tree implements renderable {
                 }
             }
 
-            // Need to do something with orphaned courses and units...
+            // Add an array element for each orphaned course...
+            foreach($orphaned_courses as $orphaned_course) {
+                $result[] = $orphaned_course;
+            }
+
+            // Then add an array element for each orphaned unit...
+            foreach($orphaned_units as $orphaned_unit) {
+                $result[] = $orphaned_unit;
+            }
+
+            // Finally record details of orphaned courses and units in case we need to do something with them later...
             $this->orphaned_courses = $orphaned_courses;
             $this->orphaned_units = $orphaned_units;
         }
