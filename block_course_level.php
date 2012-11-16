@@ -84,7 +84,7 @@ class block_course_level extends block_base {
      */
     public function get_content() {
 
-        global $CFG, $USER, $PAGE, $OUTPUT;
+        global $COURSE;
 
         if ($this->content !== null) {
             return $this->content;
@@ -127,8 +127,7 @@ class block_course_level extends block_base {
 
             $renderer = $this->page->get_renderer('block_course_level');
 
-            $parentcontext = get_context_instance_by_id($this->instance->parentcontextid);
-            $courseid = get_courseid_from_context($parentcontext);
+            $courseid = $COURSE->id;
             if(!$courseid) {
                 $courseid = 1;  // Assume we are on the site front page
             }
