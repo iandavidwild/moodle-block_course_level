@@ -155,11 +155,6 @@ class course_level_tree implements renderable {
                         $reference_programme->abandon_children();
                         foreach($new_courses as $new_course) {
                             $reference_programme->adopt_child($new_course);
-                            // Add link to course homepage...
-                            $homepage = clone $new_course;
-                            $homepage->set_fullname($homepage->get_fullname().' '.get_string('homepage', 'block_course_level'));
-                            $homepage->abandon_children();
-                            $new_course->push_child($homepage);
                         }
                     }
                 }
