@@ -60,16 +60,12 @@ class block_course_level_renderer extends plugin_renderer_base {
     public function render_course_level_tree(course_level_tree $tree) {
         global $CFG;
 
-        $module = array('name'=>'block_course_level',
-                        'fullpath'=>'/blocks/course_level/module.js',
-                        'requires'=>array('yui2-treeview'));
-
         if (empty($tree) ) {
             $html = $this->output->box(get_string('nocourses', 'block_course_level'));
         } else {
 
             $htmlid = 'course_level_tree_'.uniqid();
-            $this->page->requires->js_init_call('M.block_course_level.init_tree', array(false, $htmlid));
+            $this->page->requires->js_init_call('M.block_course_level.init_tree', array(false, $htmlid, $CFG->wwwroot.'/course/view.php?id='.$this->courseid));
             $html = '<div id="'.$htmlid.'">';
             $html .= $this->htmllize_tree($tree->courses);
             $html .= '</div>';
@@ -77,7 +73,7 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         // Add 'View all courses' link to bottom of block...
         $html .= html_writer::empty_tag('hr');
-        $viewcourses_lnk = $CFG->wwwroot.'/blocks/course_level/view.php?id='.$this->courseid;
+        $viewcourses_lnk = $CFG->wwwroot.'/blocks/course_level/view.php?id='.$this->courseid.'&tab=0';
         $attributes = array('class' => 'view-all');
         $span = html_writer::tag('span', '');
         $html .= html_writer::link($viewcourses_lnk, get_string('view_all_courses', 'block_course_level').$span, $attributes);
