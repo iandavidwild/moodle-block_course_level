@@ -25,11 +25,14 @@
 
 M.block_course_level = {};
 
-M.block_course_level.init_tree = function(Y, expand_all, htmlid) {
+M.block_course_level.init_tree = function(Y, expand_all, htmlid, current_url) {
 
     Y.use('yui2-treeview', function(Y) {
 
-        // Fix to bug UALMOODLE-58: look for &amp; entity in label and replace with &. This is to fix a bug in YUI TreeView
+        // 1. Fix to bug UALMOODLE-58: look for &amp; entity in label and replace with &. This is to fix a bug in YUI TreeView
+        // 2. Focus the current node
+        var current_node = null;
+
         function tree_traversal(node){
             if(node.hasChildren){
                 var nodes = node.children;
@@ -39,6 +42,12 @@ M.block_course_level.init_tree = function(Y, expand_all, htmlid) {
                     if(label){
                         var decoded = label.replace(/&amp;/g, '&');
                         test_node.label = decoded;
+                    }
+                    if(current_url) {
+                        var href = test_node.href;
+                        if(href == current_url) {
+                            current_node = test_node;
+                        }
                     }
                     tree_traversal(test_node);
                 }
@@ -50,10 +59,17 @@ M.block_course_level.init_tree = function(Y, expand_all, htmlid) {
 
         // Now the tree has been constructed traverse it to correct duff HTML...
         var root = tree.getRoot();
-        var array = tree_traversal(root);
+        if(root) {
+            var array = tree_traversal(root);
+        }
 
         // The tree is not created in the DOM until this method is called:
         tree.render();
+
+        // Move focus to the current node...
+        if(current_node) {
+            current_node.focus();
+        }
     });
 };
 
