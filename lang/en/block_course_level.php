@@ -75,6 +75,6 @@ $string['years_and_units']       = 'Years and units';
 $string['programme_courses']     = 'Programme courses';
 
 // Tree strings:
-$string['homepage']              = 'homepage';
+$string['homepage']              = 'Overview';
 $string['missing_homepage']      = 'Missing Course Homepage!';
 
