@@ -99,6 +99,10 @@ class block_course_level_renderer extends plugin_renderer_base {
         if (!empty($tree)) {
             foreach ($tree as $node) {
 
+                // Does this node have any children?
+                $children = $node->get_children();
+
+                // Determine the name of this node
                 $name = $this->trim($node->get_fullname());
                 if($this->showcode == 1) {
                     $name .= ' ('.$node->get_idnumber().')';
@@ -109,30 +113,26 @@ class block_course_level_renderer extends plugin_renderer_base {
 
                 $attributes = array('id' => $indent);
 
-                // Create a link
-                $attributes['title'] = $name;
-                // If the user is enrolled on this course then show a link...
-                if($node->get_user_enrolled() == true) {
-                    $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
-                    $content = html_writer::link($moodle_url, $name, $attributes);
-                } else {
-                    // Display the name but it's not clickable...
-                    // TODO make this a configuration option...
-                    $content = html_writer::tag('i', $name);
-                }
-
-                $attributes = array('yuiConfig'=>json_encode($yuiconfig));
-
-                $children = $node->get_children();
-
                 if ($children == null) {
-                    $result .= html_writer::tag('li', $content, $attributes);
+                    $attributes['title'] = $name;
+
+                    if($node->get_user_enrolled() == true) {
+                        $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
+                        $content = html_writer::link($moodle_url, $name, $attributes);
+                    } else {
+                        // Display the name but it's not clickable...
+                        // TODO make this a configuration option...
+                        $content = html_writer::tag('i', $name);
+                    }
+                    $result .= html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig)));
                 } else {
-                    // If this has parents OR it doesn't have parents or children then we need to display it...???
+                    // This is an expandible node...
+                    $content = html_writer::tag('div', $name, $attributes);
+
                     if($indent != 0) {
                         $attributes['class'] = 'expanded';
                     }
-                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), $attributes);
+                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig)));
                 }
             }
         }
