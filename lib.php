@@ -128,9 +128,8 @@ class course_level_tree implements renderable {
                 }
             }
 
-            //Now we have a relationship between courses and programmes... BUT we need to include the 'Course (all years)' level in the tree...
+            // Now we have a relationship between courses and programmes... BUT we need to include the 'Course (all years)' level in the tree...
             if(!empty($reference_programmes)) {
-
                 foreach($reference_programmes as $reference_programme) {
                     $course_years = $reference_programme->get_children();
                     $new_courses = $this->get_years_from_courses($course_years);
@@ -183,34 +182,54 @@ class course_level_tree implements renderable {
             // Finally record details of orphaned courses and units in case we need to do something with them later...
             $this->orphaned_courses = $orphaned_courses;
             $this->orphaned_units = $orphaned_units;
+
+            // Finally, finally... loop through courses and insert 'overview' pages where necessary.
+            foreach($result as $course) {
+                if($course->get_children() != null) {
+                    $overview = clone $course;
+                    $overview->set_fullname(get_string('homepage', 'block_course_level'));
+                    $overview->set_shortname(get_string('homepage', 'block_course_level'));
+                    $overview->abandon_children();
+
+                    $course->push_child($overview);
+                }
+            }
         }
 
         return $result;
     }
 
+    /**
+     * The concept of a 'Course (all years)' level is implicit in the data provided by UAL. The purpose of this
+     * function is to process the course data to make explicit that which is implicit.
+     *
+     * @param $course_years
+     * @return array
+     */
     private function get_years_from_courses($course_years) {
         $result = array();
 
         $grouped_courses = array();
 
         if(!empty($course_years)) {
-            // Group courses by year
 
+            // Attempt to group courses by year
             foreach($course_years as $course_year) {
                 $course_name = $course_year->get_aos_code().substr($course_year->get_aos_period(),0,2).$course_year->get_acad_period();
 
                 $grouped_courses[$course_name][] = $course_year;
             }
 
+            // Do we have any grouped courses?..
             if(!empty($grouped_courses)) {
                 foreach($grouped_courses as $course_year => $courses) {
 
                     // Make new course for 'Course (all years)' level - this information needs to come from the API but construct it manually for now...
                     $new_course = new ual_course(array('fullname' => $course_year, 'idnumber' => $course_year));
-                    foreach($courses as $course) {
-                        $new_course->adopt_child($course);
-                    }
                     $result[] = $new_course;
+                    foreach($courses as $course) {
+                        $result[] = $course;
+                    }
                 }
             }
         }
