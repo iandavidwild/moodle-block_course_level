@@ -108,10 +108,32 @@ class block_course_level_renderer extends plugin_renderer_base {
                     $name .= ' ('.$node->get_idnumber().')';
                 }
 
+
                 // Fix to bug UALMOODLE-58: look for ampersand in fullname and replace it with entity
                 $name = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $name);
 
-                $attributes = array('id' => $indent);
+                $name = $this->trim($name);
+                $node_type = $node->get_type();
+
+                $type_class = 'unknown';
+
+                switch($node_type) {
+                    case ual_course::COURSETYPE_PROGRAMME:
+                        $type_class = 'programme';
+                        break;
+                    case ual_course::COURSETYPE_ALLYEARS:
+                        $type_class = 'course_all_years';
+                        break;
+                    case ual_course::COURSETYPE_COURSE:
+                        $type_class = 'course';
+                        break;
+                    case ual_course::COURSETYPE_UNIT:
+                        $type_class = 'unit';
+                        break;
+                }
+
+
+                $attributes = array();
 
                 if ($children == null) {
                     $attributes['title'] = $name;
@@ -122,9 +144,9 @@ class block_course_level_renderer extends plugin_renderer_base {
                     } else {
                         // Display the name but it's not clickable...
                         // TODO make this a configuration option...
-                        $content = html_writer::tag('i', $name);
+                        $content = html_writer::tag('i', $name, $attributes);
                     }
-                    $result .= html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig)));
+                    $result .= html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 } else {
                     // This is an expandible node...
                     $content = html_writer::tag('div', $name, $attributes);
@@ -132,7 +154,7 @@ class block_course_level_renderer extends plugin_renderer_base {
                     if($indent != 0) {
                         $attributes['class'] = 'expanded';
                     }
-                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig)));
+                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 }
             }
         }
