@@ -225,7 +225,7 @@ class course_level_tree implements renderable {
                 foreach($grouped_courses as $course_year => $courses) {
 
                     // Make new course for 'Course (all years)' level - this information needs to come from the API but construct it manually for now...
-                    $new_course = new ual_course(array('fullname' => $course_year, 'idnumber' => $course_year));
+                    $new_course = new ual_course(array('fullname' => $course_year, 'idnumber' => $course_year, 'type' => ual_course::COURSETYPE_ALLYEARS));
                     $result[] = $new_course;
                     foreach($courses as $course) {
                         $result[] = $course;
