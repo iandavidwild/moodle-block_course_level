@@ -135,6 +135,9 @@ class block_course_level_renderer extends plugin_renderer_base {
 
                 $attributes = array();
 
+                // Insert a span tag to allow us to insert an arrow...
+                $span = html_writer::tag('span', '');
+
                 if ($children == null) {
                     $attributes['title'] = $name;
 
@@ -148,12 +151,14 @@ class block_course_level_renderer extends plugin_renderer_base {
                     }
                     $result .= html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 } else {
-                    // This is an expandible node...
-                    $content = html_writer::tag('div', $name, $attributes);
+                    // This is an expandable node...
+                    $content = html_writer::tag('div', $name.$span, $attributes);
 
                     if($indent != 0) {
                         $attributes['class'] = 'expanded';
                     }
+
+
                     $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 }
             }
