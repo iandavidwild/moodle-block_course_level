@@ -394,7 +394,7 @@ if ($tab == PROGRAMMES_VIEW) {
                     $links = array(); // Start with an empty list of links.
                     foreach ($units as $unit) {
                         $links[] = html_writer::link(new moodle_url('/course/view.php?id='.$unit->get_moodle_course_id()),
-                                                                    $unit->get_idnumber().' - '.$unit->get_fullname(),
+                                                                    $unit->get_shortname().' - '.$unit->get_fullname(),
                                                      array('id' => 'unit_link'));
                     }
                     // Implode the list of links and separate with a <br/>...
