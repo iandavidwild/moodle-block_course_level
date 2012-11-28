@@ -71,8 +71,8 @@ $string['programmesview']        = 'Programmes';
 // Table links:
 $string['course_home']           = 'Course home';
 $string['programme_home']        = 'Programme home';
-$string['years_and_units']       = 'Years and units';
-$string['programme_courses']     = 'Programme courses';
+$string['years_and_units']       = 'Show units';
+$string['programme_courses']     = 'Show courses';
 
 // Tree strings:
 $string['homepage']              = 'Overview';
