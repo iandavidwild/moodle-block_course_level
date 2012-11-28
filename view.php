@@ -115,9 +115,9 @@ if ($tab == PROGRAMMES_VIEW) {
 
     // Define a table showing a list of all courses.
     // Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
-    $tablecolumns = array('shortname', 'course_fullname', 'home', 'courses');
+    $tablecolumns = array('shortname', 'course_fullname', 'courses');
     $tableheaders = array(get_string('shortname', 'block_course_level'), get_string('fullname', 'block_course_level'),
-        get_string('link', 'block_course_level'), get_string('courses', 'block_course_level'));
+        get_string('courses', 'block_course_level'));
 
     $table = new flexible_table('block-course-level-display-all-'.$course->id);
     $table->define_columns($tablecolumns);
@@ -127,7 +127,6 @@ if ($tab == PROGRAMMES_VIEW) {
     $table->sortable(true, 'shortname', SORT_ASC);
     $table->sortable(true, 'course_fullname', SORT_ASC);
     // Set 'no_sorting' options if necessary... e.g.
-    $table->no_sorting('home');
     $table->no_sorting('courses');
 
     $table->set_attribute('cellspacing', '0');
@@ -191,13 +190,12 @@ if ($tab == PROGRAMMES_VIEW) {
             }
             $data = array();
 
-            $data[] = $course->shortname;
-            $data[] = $course->fullname;
+            $data[] = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
+                $course->shortname);
 
-            $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
-                                        get_string('programme_home', 'block_course_level'));
+            $data[] = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
+                $course->fullname);
 
-            $data[] = $link;
 
             // Output the links to this programme's courses...
             $progcourses = $ual_mis->get_programme_courses($course->idnumber, '', ' ORDER BY idnumber ASC');
@@ -283,9 +281,9 @@ if ($tab == PROGRAMMES_VIEW) {
 
     // Define a table showing a list of all courses
     // Note: 'fullname' is treated as special in a flexible_table. Call the column 'course_fullname' instead.
-    $tablecolumns = array('shortname', 'course_fullname', 'home', 'units');
+    $tablecolumns = array('shortname', 'course_fullname', 'units');
     $tableheaders = array(get_string('shortname', 'block_course_level'), get_string('fullname', 'block_course_level'),
-        get_string('link', 'block_course_level'), get_string('units', 'block_course_level'));
+       get_string('units', 'block_course_level'));
 
     $table = new flexible_table('block-course-level-display-all-'.$course->id);
     $table->define_columns($tablecolumns);
@@ -295,7 +293,7 @@ if ($tab == PROGRAMMES_VIEW) {
     $table->sortable(true, 'shortname', SORT_ASC);
     $table->sortable(true, 'course_fullname', SORT_ASC);
     // Set 'no_sorting' options if necessary... e.g.
-    $table->no_sorting('home');
+
     $table->no_sorting('units');
 
     $table->set_attribute('cellspacing', '0');
@@ -358,13 +356,13 @@ if ($tab == PROGRAMMES_VIEW) {
             }
             $data = array();
 
-            $link = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
-                                          get_string('course_home', 'block_course_level'));
 
-            $data[] = $course->shortname;
-            $data[] = $course->fullname;
+            $data[] = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
+                $course->shortname);
 
-            $data[] = $link;
+            $data[] = html_writer::link(new moodle_url('/course/view.php?id='.$course->id),
+                $course->fullname);
+
 
             // Output links to this course's units.
             $course_code_no_year = substr($course->idnumber, 0, 8).'?'.substr($course->idnumber,-6, 6);
