@@ -33,6 +33,7 @@ require_once($CFG->dirroot . '/blocks/course_level/lib.php');
 class block_course_level_renderer extends plugin_renderer_base {
 
     private $showcode = 0;
+    private $showmoodlecourses = 0;
     private $trimmode = block_course_level::TRIM_RIGHT;
     private $trimlength = 50;
     private $courseid = 0;
@@ -41,8 +42,9 @@ class block_course_level_renderer extends plugin_renderer_base {
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid) {
+    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses) {
         $this->showcode = $showcode;
+        $this->showmoodlecourses = $showmoodlecourses;
         $this->trimmode = $trimmode;
         $this->trimlength = $trimlength;
         $this->courseid = $courseid;
@@ -69,6 +71,17 @@ class block_course_level_renderer extends plugin_renderer_base {
             $html = '<div id="'.$htmlid.'">';
             $html .= $this->htmllize_tree($tree->courses);
             $html .= '</div>';
+        }
+
+        // Do we display courses that the user is enrolled on in Moodle but not enrolled on them according to the IDM data?
+        if($this->showmoodlecourses && !empty($tree->moodle_courses)) {
+            $html .= html_writer::empty_tag('hr');
+
+            foreach($tree->moodle_courses as $course) {
+                $attributes = array();
+                $courselnk = $CFG->wwwroot.'/course/view.php?id='.$course->id;
+                $html .= html_writer::link($courselnk,$course->fullname, $attributes);
+            }
         }
 
         // Add 'View all courses' link to bottom of block...
@@ -107,7 +120,6 @@ class block_course_level_renderer extends plugin_renderer_base {
                 if($this->showcode == 1) {
                     $name .= ' ('.$node->get_idnumber().')';
                 }
-
 
                 // Fix to bug UALMOODLE-58: look for ampersand in fullname and replace it with entity
                 $name = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $name);
