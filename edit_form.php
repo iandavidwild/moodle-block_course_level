@@ -55,5 +55,8 @@ class block_course_level_edit_form extends block_edit_form {
         $mform->addElement('text', 'config_trimlength', get_string('trimlength', 'block_course_level'));
         $mform->setDefault('config_trimlength', 50);
         $mform->setType('config_trimlength', PARAM_INT);
+
+        $mform->addElement('advcheckbox', 'config_showmoodlecourses', get_string('showmoodlecourses', 'block_course_level'));
+        $mform->setDefault('config_showmoodlecourses', 0);
     }
 }
