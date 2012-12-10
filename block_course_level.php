@@ -94,11 +94,16 @@ class block_course_level extends block_base {
         }
 
         $showcode = 0;
+        $showmoodlecourses = 0;
         $trimmode = 1;
         $trimlength = 50;
 
         if (!empty($this->config->showcode)) {
             $showcode = (int)$this->config->showcode;
+        }
+
+        if (!empty($this->config->showmoodlecourses)) {
+            $showmoodlecourses = (int)$this->config->showmoodlecourses;
         }
 
         if (!empty($this->config->trimmode)) {
@@ -131,7 +136,7 @@ class block_course_level extends block_base {
             if(!$courseid) {
                 $courseid = 1;  // Assume we are on the site front page
             }
-            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid);
+            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses);
             $this->content->footer = '';
 
         }
