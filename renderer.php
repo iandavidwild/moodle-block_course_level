@@ -77,8 +77,7 @@ class block_course_level_renderer extends plugin_renderer_base {
         if($this->showmoodlecourses && !empty($tree->moodle_courses)) {
             $html .= html_writer::empty_tag('hr');
 
-
-            $orphaned_courses = html_writer::start_tag('ul');
+            $orphaned_courses = html_writer::start_tag('ul', array('class' => 'orphaned'));
             foreach($tree->moodle_courses as $course) {
                 $courselnk = $CFG->wwwroot.'/course/view.php?id='.$course->id;
                 $linkhtml = html_writer::link($courselnk,$course->fullname, array('class' => 'orphaned_course'));
@@ -88,7 +87,6 @@ class block_course_level_renderer extends plugin_renderer_base {
 
             $html .= $orphaned_courses;
         }
-
 
         // Add 'View all courses' link to bottom of block...
         $html .= html_writer::empty_tag('hr');
