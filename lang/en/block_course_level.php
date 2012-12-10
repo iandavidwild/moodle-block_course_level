@@ -35,6 +35,7 @@ $string['view_all_courses']      = 'View all courses';
 
 $string['title']                 = 'Title';
 $string['showcode']              = 'Show course code';
+$string['showmoodlecourses']     = 'Show orphaned courses';
 $string['trimmodeleft']          = 'Trim characters from the left';
 $string['trimmoderight']         = 'Trim characters from the right';
 $string['trimmodecentre']        = 'Trim characters from the centre';
