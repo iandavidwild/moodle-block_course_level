@@ -111,11 +111,10 @@ class block_course_level_renderer extends plugin_renderer_base {
         $yuiconfig = array();
         $yuiconfig['type'] = 'html';
 
-        $result = '<ul>';
+        $result = '';
 
         if (!empty($tree)) {
             foreach ($tree as $node) {
-
                 // Does this node have any children?
                 $children = $node->get_children();
 
@@ -148,24 +147,27 @@ class block_course_level_renderer extends plugin_renderer_base {
                         break;
                 }
 
-
                 $attributes = array();
 
                 // Insert a span tag to allow us to insert an arrow...
                 $span = html_writer::tag('span', '');
 
                 if ($children == null) {
-                    $attributes['title'] = $name;
+                    if($node->get_visible() == true) {
+                        // Only write out the node if the course it represents is visible
+                        $attributes['title'] = $name;
 
-                    if($node->get_user_enrolled() == true) {
-                        $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
-                        $content = html_writer::link($moodle_url, $name, $attributes);
-                    } else {
-                        // Display the name but it's not clickable...
-                        // TODO make this a configuration option...
-                        $content = html_writer::tag('i', $name, $attributes);
+                        if($node->get_user_enrolled() == true) {
+                            $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
+                            $content = html_writer::link($moodle_url, $name, $attributes);
+                        } else {
+                            // Display the name but it's not clickable...
+                            // TODO make this a configuration option...
+                            $content = html_writer::tag('i', $name, $attributes);
+                        }
+
+                        $result = html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                     }
-                    $result .= html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 } else {
                     // This is an expandable node...
                     $content = html_writer::tag('div', $name.$span, $attributes);
@@ -174,12 +176,12 @@ class block_course_level_renderer extends plugin_renderer_base {
                         $attributes['class'] = 'expanded';
                     }
 
-
-                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
+                    $result = html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 }
             }
         }
-        $result .= '</ul>';
+
+        $result = html_writer::tag('ul', $result);
 
         return $result;
     }
