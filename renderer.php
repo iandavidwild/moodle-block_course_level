@@ -111,7 +111,7 @@ class block_course_level_renderer extends plugin_renderer_base {
         $yuiconfig = array();
         $yuiconfig['type'] = 'html';
 
-        $result = '';
+        $result = html_writer::start_tag('ul');
 
         if (!empty($tree)) {
             foreach ($tree as $node) {
@@ -166,7 +166,7 @@ class block_course_level_renderer extends plugin_renderer_base {
                             $content = html_writer::tag('i', $name, $attributes);
                         }
 
-                        $result = html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
+                        $result .= html_writer::tag('li', $content, array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                     }
                 } else {
                     // This is an expandable node...
@@ -176,12 +176,12 @@ class block_course_level_renderer extends plugin_renderer_base {
                         $attributes['class'] = 'expanded';
                     }
 
-                    $result = html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
+                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 }
             }
         }
 
-        $result = html_writer::tag('ul', $result);
+        $result .= html_writer::end_tag('ul');
 
         return $result;
     }
