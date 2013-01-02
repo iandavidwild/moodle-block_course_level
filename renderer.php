@@ -64,6 +64,8 @@ class block_course_level_renderer extends plugin_renderer_base {
 
         $displayed_something = false;
 
+        $html = ""; // Start with an empty string.
+
         if (!empty($tree->courses) ) {
             $htmlid = 'course_level_tree_'.uniqid();
             $this->page->requires->js_init_call('M.block_course_level.init_tree', array(false, $htmlid, $CFG->wwwroot.'/course/view.php?id='.$this->courseid));
