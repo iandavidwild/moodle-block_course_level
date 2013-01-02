@@ -62,15 +62,16 @@ class block_course_level_renderer extends plugin_renderer_base {
     public function render_course_level_tree(course_level_tree $tree) {
         global $CFG;
 
-        if (empty($tree) ) {
-            $html = $this->output->box(get_string('nocourses', 'block_course_level'));
-        } else {
+        $displayed_something = false;
 
+        if (!empty($tree->courses) ) {
             $htmlid = 'course_level_tree_'.uniqid();
             $this->page->requires->js_init_call('M.block_course_level.init_tree', array(false, $htmlid, $CFG->wwwroot.'/course/view.php?id='.$this->courseid));
             $html = '<div id="'.$htmlid.'">';
             $html .= $this->htmllize_tree($tree->courses);
             $html .= '</div>';
+
+            $displayed_something = true;
         }
 
         // Do we display courses that the user is enrolled on in Moodle but not enrolled on them according to the IDM data?
@@ -86,6 +87,12 @@ class block_course_level_renderer extends plugin_renderer_base {
             $orphaned_courses .= html_writer::end_tag('ul');
 
             $html .= $orphaned_courses;
+
+            $displayed_something = true;
+        }
+
+        if(!$displayed_something) {
+            $html = $this->output->box(get_string('nocourses', 'block_course_level'));
         }
 
         // Add 'View all courses' link to bottom of block...
