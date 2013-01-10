@@ -212,6 +212,8 @@ class course_level_tree implements renderable {
      * @return array
      */
     private function get_years_from_courses($course_years) {
+        global $USER;
+
         $result = array();
 
         $grouped_courses = array();
@@ -231,6 +233,15 @@ class course_level_tree implements renderable {
 
                     // Make new course for 'Course (all years)' level - this information needs to come from the API but construct it manually for now...
                     $new_course = new ual_course(array('fullname' => $course_year, 'idnumber' => $course_year, 'type' => ual_course::COURSETYPE_ALLYEARS));
+                    // Do we need to link to a Moodle course?
+                    $moodle_course = $this->get_moodle_course($course_year);
+                    if($moodle_course) {
+                        $new_course->set_moodle_course_id($moodle_course->id);
+                        $new_course->set_fullname($moodle_course->fullname);
+                        $mis = new ual_mis();
+                        $new_course->set_user_enrolled($mis->get_enrolled($USER->id, $moodle_course->id));
+                    }
+
                     $result[] = $new_course;
                     foreach($courses as $course) {
                         $result[] = $course;
@@ -240,6 +251,17 @@ class course_level_tree implements renderable {
         }
 
         return ($result);
+    }
+
+    private function get_moodle_course($courseid) {
+        global $DB;
+
+        $select = 'shortname IN (\''.$courseid.'\')';
+
+        // TODO this doesn't need to fetch a recordset as we're only expecting a single record.
+        $moodle_course = $DB->get_record_select('course', $select);
+
+        return $moodle_course;
     }
 }
 
