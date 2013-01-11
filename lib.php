@@ -86,6 +86,12 @@ class course_level_tree implements renderable {
                     $programme_code = $programme->get_aos_code().$programme->get_aos_period().$programme->get_acad_period();
                     // We don't have to worry about a user being enrolled on a programme as this information isn't displayed.
                     $reference_programmes[$programme_code] = $programme;
+
+                    // Remove programme from the $moodle_courses array if necessary
+                    $programme_moodle_id = $programme->get_moodle_course_id();
+                    if(isset($this->moodle_courses[$programme_moodle_id])) {
+                        unset($this->moodle_courses[$programme_moodle_id]);
+                    }
                 }
             }
 
@@ -158,7 +164,14 @@ class course_level_tree implements renderable {
                     if(!empty($new_courses)) {
                         $reference_programme->abandon_children();
                         foreach($new_courses as $new_course) {
+                            // Programmes need to adopt the 'Course (all years)'
                             $reference_programme->adopt_child($new_course);
+
+                            // Remove course (all years) from the $moodle_courses array if necessary
+                            $all_years_moodle_id = $new_course->get_moodle_course_id();
+                            if(isset($this->moodle_courses[$all_years_moodle_id])) {
+                                unset($this->moodle_courses[$all_years_moodle_id]);
+                            }
                         }
                     }
                 }
