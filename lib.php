@@ -133,7 +133,7 @@ class course_level_tree implements renderable {
                     } else {
                         $unit_parent = $unit->get_parent();
                         if(isset($reference_courses[$unit_parent])) {
-                            $parent = $reference_courses[$unit_parent()];
+                            $parent = $reference_courses[$unit_parent];
                             if(!empty($parent)) {
                                 $parent->adopt_child($unit);
                             }
