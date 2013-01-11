@@ -131,9 +131,12 @@ class course_level_tree implements renderable {
                     if(strlen($unit->get_parent()) == 0) {
                         $orphaned_units[] = $unit;
                     } else {
-                        $parent = $reference_courses[$unit->get_parent()];
-                        if(!empty($parent)) {
-                            $parent->adopt_child($unit);
+                        $unit_parent = $unit->get_parent();
+                        if(isset($reference_courses[$unit_parent])) {
+                            $parent = $reference_courses[$unit_parent()];
+                            if(!empty($parent)) {
+                                $parent->adopt_child($unit);
+                            }
                         }
                     }
                 }
