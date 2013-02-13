@@ -122,7 +122,7 @@ class block_course_level_renderer extends plugin_renderer_base {
                      <input type='hidden' name='url' value='{$redirect_url}'/>
                      <input type='hidden' name='username' value='{$USER->username}'/>
                      <input type='hidden' name='magic' value='{$magic_text}'/>
-                     <input type='submit' value='{$button_text}'/>
+                     <input type='submit' id='admin_tool_submit' value='{$button_text}'/>
                      </form></div>";
         }
 
