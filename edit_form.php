@@ -58,5 +58,13 @@ class block_course_level_edit_form extends block_edit_form {
 
         $mform->addElement('advcheckbox', 'config_showmoodlecourses', get_string('showmoodlecourses', 'block_course_level'));
         $mform->setDefault('config_showmoodlecourses', 0);
+
+        $mform->addElement('text', 'config_admin_tool_url', get_string('admin_tool_url', 'block_course_level'));
+        $mform->setDefault('config_admin_tool_url', get_string('default_admin_tool_url', 'block_course_level'));
+        $mform->setType('config_admin_tool_url', PARAM_URL);
+
+        $mform->addElement('text', 'config_admin_tool_magic', get_string('admin_tool_magic', 'block_course_level'));
+        $mform->setDefault('config_admin_tool_magic', get_string('default_admin_tool_magic', 'block_course_level'));
+        $mform->setType('config_admin_tool_magic', PARAM_TEXT);
     }
 }
