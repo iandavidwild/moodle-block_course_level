@@ -97,6 +97,8 @@ class block_course_level extends block_base {
         $showmoodlecourses = 0;
         $trimmode = 1;
         $trimlength = 50;
+        $admin_tool_url = '';
+        $admin_tool_magic_text = '';
 
         if (!empty($this->config->showcode)) {
             $showcode = (int)$this->config->showcode;
@@ -112,6 +114,14 @@ class block_course_level extends block_base {
 
         if (!empty($this->config->trimlength)) {
             $trimlength = (int)$this->config->trimlength;
+        }
+
+        if (!empty($this->config->admin_tool_url)) {
+            $admin_tool_url = $this->config->admin_tool_url;
+        }
+
+        if (!empty($this->config->admin_tool_magic)) {
+            $admin_tool_magic_text = $this->config->admin_tool_magic;
         }
 
         // Load userdefined title and make sure it's never empty.
@@ -136,7 +146,7 @@ class block_course_level extends block_base {
             if(!$courseid) {
                 $courseid = 1;  // Assume we are on the site front page
             }
-            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses);
+            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text);
             $this->content->footer = '';
 
         }
