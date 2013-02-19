@@ -113,17 +113,19 @@ class block_course_level_renderer extends plugin_renderer_base {
         $context = get_context_instance(CONTEXT_SYSTEM);
         $display_admin_tool_link = has_capability('block/course_level:admin_db_link', $context);
 
-
         if($display_admin_tool_link) {
-            $button_text = get_string('admin_tool_link', 'block_course_level');
-            $redirect_url = $this->admin_tool_url;
-            $magic_text = $this->admin_tool_magic_text;
-            $html .="<div class='singlebutton'><form action='{$redirect_url}' method='post'>
-                     <input type='hidden' name='url' value='{$redirect_url}'/>
-                     <input type='hidden' name='username' value='{$USER->username}'/>
-                     <input type='hidden' name='magic' value='{$magic_text}'/>
-                     <input type='submit' id='admin_tool_submit' value='{$button_text}'/>
-                     </form></div>";
+            // What is this user's role in MIS? Perform a strcmp for now as this is currently in development...
+            if(strcmp($tree->ual_user_role, 'STAFF') == 0) {
+                $button_text = get_string('admin_tool_link', 'block_course_level');
+                $redirect_url = $this->admin_tool_url;
+                $magic_text = $this->admin_tool_magic_text;
+                $html .="<div class='singlebutton'><form action='{$redirect_url}' method='post'>
+                         <input type='hidden' name='url' value='{$redirect_url}'/>
+                         <input type='hidden' name='username' value='{$USER->username}'/>
+                         <input type='hidden' name='magic' value='{$magic_text}'/>
+                         <input type='submit' id='admin_tool_submit' value='{$button_text}'/>
+                         </form></div>";
+            }
         }
 
         return $html;

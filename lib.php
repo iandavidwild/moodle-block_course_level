@@ -29,8 +29,8 @@ class course_level_tree implements renderable {
     public $courses = array();
     public $orphaned_courses = array();
     public $orphaned_units = array();
-
     public $moodle_courses = array();
+    public $ual_user_role = 'UNKNOWN';
 
     public function __construct() {
         global $USER;
@@ -42,6 +42,9 @@ class course_level_tree implements renderable {
 
             // The user's username could be their LDAP username or an historical username...
             $ual_username = $mis->get_ual_username($USER->username);
+
+            // What is this user's role, according to the MIS?
+            $this->ual_user_role = $mis->get_user_role($USER->username);
 
             // What units is this user enrolled on?
             $units = $mis->get_user_units($ual_username);
