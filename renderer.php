@@ -119,7 +119,7 @@ class block_course_level_renderer extends plugin_renderer_base {
                 $button_text = get_string('admin_tool_link', 'block_course_level');
                 $redirect_url = $this->admin_tool_url;
                 $magic_text = $this->admin_tool_magic_text;
-                $html .="<div class='singlebutton'><form action='{$redirect_url}' method='post'>
+                $html .="<div class='singlebutton'><form target='_blank' action='{$redirect_url}' method='post'>
                          <input type='hidden' name='url' value='{$redirect_url}'/>
                          <input type='hidden' name='username' value='{$USER->username}'/>
                          <input type='hidden' name='magic' value='{$magic_text}'/>
