@@ -99,6 +99,7 @@ class block_course_level extends block_base {
         $trimlength = 50;
         $admin_tool_url = '';
         $admin_tool_magic_text = '';
+        $showhiddencourses = true;
 
         if (!empty($this->config->showcode)) {
             $showcode = (int)$this->config->showcode;
@@ -130,6 +131,10 @@ class block_course_level extends block_base {
         } else {
             $this->title = $this->config->title;
         }
+        
+        // Do we show hidden courses?
+        $context = get_context_instance(CONTEXT_SYSTEM);
+        $showhiddencourses = has_capability('block/course_level:show_hidden_courses', $context);
 
         $this->content = new stdClass();
 
@@ -146,7 +151,7 @@ class block_course_level extends block_base {
             if(!$courseid) {
                 $courseid = 1;  // Assume we are on the site front page
             }
-            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text);
+            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text, $showhiddencourses);
             $this->content->footer = '';
 
         }
