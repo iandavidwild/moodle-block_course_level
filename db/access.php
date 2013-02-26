@@ -43,5 +43,14 @@ $capabilities = array(
         'archetypes'   => array(
             'manager'          => CAP_ALLOW
         )
-    )
+    ),
+		
+	'block/course_level:show_hidden_courses' => array(
+		'riskbitmask'  => RISK_PERSONAL,
+		'captype'      => 'write',
+		'contextlevel' => CONTEXT_SYSTEM,
+		'archetypes'   => array(
+			'manager'          => CAP_ALLOW
+		)
+	)
 );
