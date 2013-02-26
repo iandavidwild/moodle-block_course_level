@@ -39,12 +39,13 @@ class block_course_level_renderer extends plugin_renderer_base {
     private $courseid = 0;
     private $admin_tool_url = '';
     private $admin_tool_magic_text = '';
+    private $showhiddencourses = false;
 
     /**
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text) {
+    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text, $showhiddencourses) {
         $this->showcode = $showcode;
         $this->showmoodlecourses = $showmoodlecourses;
         $this->trimmode = $trimmode;
@@ -52,7 +53,8 @@ class block_course_level_renderer extends plugin_renderer_base {
         $this->courseid = $courseid;
         $this->admin_tool_url = $admin_tool_url;
         $this->admin_tool_magic_text = $admin_tool_magic_text;
-
+		$this->showhiddencourses = $showhiddencourses;
+		
         return $this->render(new course_level_tree);
     }
 
@@ -179,6 +181,8 @@ class block_course_level_renderer extends plugin_renderer_base {
                         $type_class = 'unit';
                         break;
                 }
+                
+                $display_node = $node->get_visible() || $this->showhiddencourses;
 
                 $attributes = array();
 
@@ -186,16 +190,19 @@ class block_course_level_renderer extends plugin_renderer_base {
                 $span = html_writer::tag('span', '');
 
                 if ($children == null) {
-                    if($node->get_visible() == true) {
+                    if($display_node) {
                         // Only write out the node if the course it represents is visible
                         $attributes['title'] = $name;
 
-                        if($node->get_user_enrolled() == true) {
+                        if(($node->get_user_enrolled() == true) && $node->get_visible()) {
                             $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
                             $content = html_writer::link($moodle_url, $name, $attributes);
                         } else {
                             // Display the name but it's not clickable...
                             // TODO make this a configuration option...
+                            if($this->showhiddencourses) {
+                            	$attributes['class'] = 'hidden';
+                            }
                             $content = html_writer::tag('i', $name, $attributes);
                         }
 
