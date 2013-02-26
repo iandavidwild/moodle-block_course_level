@@ -90,5 +90,6 @@ $string['default_admin_tool_magic'] = 'qazmagicwsx123';
 // Capabilities
 $string['course_level:can_edit'] = 'Can edit';
 $string['course_level:admin_db_link'] = 'Display Admin DB Tool Link';
+$strong['course_level:show_hidden_courses'] = 'Show hidden courses';
 
 
