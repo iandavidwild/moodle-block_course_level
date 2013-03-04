@@ -97,9 +97,6 @@ class block_course_level extends block_base {
         $showmoodlecourses = 0;
         $trimmode = 1;
         $trimlength = 50;
-        $admin_tool_url = '';
-        $admin_tool_magic_text = '';
-        $showhiddencourses = true;
 
         if (!empty($this->config->showcode)) {
             $showcode = (int)$this->config->showcode;
@@ -117,13 +114,9 @@ class block_course_level extends block_base {
             $trimlength = (int)$this->config->trimlength;
         }
 
-        if (!empty($this->config->admin_tool_url)) {
-            $admin_tool_url = $this->config->admin_tool_url;
-        }
-
-        if (!empty($this->config->admin_tool_magic)) {
-            $admin_tool_magic_text = $this->config->admin_tool_magic;
-        }
+        // Access to Admin Tool is set globally
+        $admin_tool_url = get_config('block_course_level', 'admin_tool_url');
+        $admin_tool_magic_text  = get_config('block_course_level', 'admin_tool_magic_text');
 
         // Load userdefined title and make sure it's never empty.
         if (empty($this->config->title)) {
@@ -206,5 +199,14 @@ class block_course_level extends block_base {
     function user_can_edit() {
         $context = get_context_instance(CONTEXT_SYSTEM);
         return (has_capability('block/course_level:can_edit', $context));
+    }
+
+    /**
+     * There are global settings associated with this block.
+     *
+     * @return bool
+     */
+    function has_config() {
+        return true;
     }
 }
