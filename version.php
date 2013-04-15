@@ -25,8 +25,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$plugin->version = 2013030403;
+$plugin->version = 2013021102;
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->requires = 2011070100; // 2.1.
 $plugin->component = 'block_course_level';
-$plugin->release = '0.3 (Build: 2013030403)';
+$plugin->release = '0.2 (Build: 2013021102)';
