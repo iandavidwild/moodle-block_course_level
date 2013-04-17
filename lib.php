@@ -37,9 +37,9 @@ class course_level_tree implements renderable {
         $this->context = get_context_instance(CONTEXT_USER, $USER->id);
 
         // Is ual_mis class loaded?
-        if (class_exists('ual_mis')) {
-            $mis = new ual_mis();
+        $mis = ual_api::getInstance();
 
+        if (isset($mis)) {
             // The user's username could be their LDAP username or an historical username...
             $ual_username = $mis->get_ual_username($USER->username);
 
@@ -79,9 +79,9 @@ class course_level_tree implements renderable {
 
         $result = array();
 
-        if (class_exists('ual_mis')) {
-            $mis = new ual_mis();
+        $mis = ual_api::getInstance();
 
+        if(isset($mis)) {
             // Create a reference array of programmes
             $reference_programmes = array();
             if(!empty($programmes)) {
@@ -261,7 +261,7 @@ class course_level_tree implements renderable {
                     if($moodle_course) {
                         $new_course->set_moodle_course_id($moodle_course->id);
                         $new_course->set_fullname($moodle_course->fullname);
-                        $mis = new ual_mis();
+                        $mis = ual_api::getInstance();
                         $new_course->set_user_enrolled($mis->get_enrolled($USER->id, $moodle_course->id));
                     }
 
