@@ -45,12 +45,22 @@ $capabilities = array(
         )
     ),
 		
-	'block/course_level:show_hidden_courses' => array(
+	'block/course_level:show_hidden_courses_staff' => array(
 		'riskbitmask'  => RISK_PERSONAL,
 		'captype'      => 'write',
 		'contextlevel' => CONTEXT_SYSTEM,
 		'archetypes'   => array(
 			'manager'          => CAP_ALLOW
 		)
-	)
+	),
+
+    'block/course_level:show_hidden_courses_students' => array(
+        'riskbitmask'  => RISK_PERSONAL,
+        'captype'      => 'write',
+        'contextlevel' => CONTEXT_SYSTEM,
+        'archetypes'   => array(
+            'manager'          => CAP_ALLOW
+        )
+    )
+
 );

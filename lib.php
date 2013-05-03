@@ -212,14 +212,19 @@ class course_level_tree implements renderable {
             $this->orphaned_units = $orphaned_units;
 
             // Finally, finally... loop through courses and insert 'overview' pages where necessary.
-            foreach($result as $course) {
-                if($course->get_children() != null) {
-                    $overview = clone $course;
-                    $overview->set_fullname(get_string('homepage', 'block_course_level'));
-                    $overview->set_shortname(get_string('homepage', 'block_course_level'));
-                    $overview->abandon_children();
+            foreach($result as $course_all_years) {
+                if($course_all_years->get_children() != null) {
+                    $courses = $course_all_years->get_children();
+                    foreach($courses as $this_course) {
+                        if(isset($this_course)) {
+                            $overview = clone $this_course;
+                            $overview->set_fullname(get_string('homepage', 'block_course_level'));
+                            $overview->set_shortname(get_string('homepage', 'block_course_level'));
+                            $overview->abandon_children();
 
-                    $course->push_child($overview);
+                            $this_course->push_child($overview);
+                        }
+                    }
                 }
             }
         }
@@ -263,6 +268,7 @@ class course_level_tree implements renderable {
                         $new_course->set_fullname($moodle_course->fullname);
                         $mis = ual_api::getInstance();
                         $new_course->set_user_enrolled($mis->get_enrolled($USER->id, $moodle_course->id));
+                        $new_course->set_visible($moodle_course->visible);
                     }
 
                     foreach($courses as $course) {

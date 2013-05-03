@@ -45,7 +45,7 @@ class block_course_level_renderer extends plugin_renderer_base {
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text, $showhiddencourses) {
+    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text, $showhiddencoursesstudents, $showhiddencoursesstaff ) {
         $this->showcode = $showcode;
         $this->showmoodlecourses = $showmoodlecourses;
         $this->trimmode = $trimmode;
@@ -53,8 +53,8 @@ class block_course_level_renderer extends plugin_renderer_base {
         $this->courseid = $courseid;
         $this->admin_tool_url = $admin_tool_url;
         $this->admin_tool_magic_text = $admin_tool_magic_text;
-		$this->showhiddencourses = $showhiddencourses;
-		
+        $this->showhiddencoursesstudents = $showhiddencoursesstudents;
+        $this->showhiddencoursesstaff = $showhiddencoursesstaff;
         return $this->render(new course_level_tree);
     }
 
@@ -141,7 +141,7 @@ class block_course_level_renderer extends plugin_renderer_base {
      * @return string
      */
     protected function htmllize_tree($tree, $indent=0) {
-        global $CFG;
+        global $CFG, $USER;
 
         $yuiconfig = array();
         $yuiconfig['type'] = 'html';
@@ -163,6 +163,9 @@ class block_course_level_renderer extends plugin_renderer_base {
                 $name = preg_replace('/&(?![#]?[a-z0-9]+;)/i', "&amp;$1", $name);
 
                 $name = $this->trim($name);
+                // Is this course visible?
+                $visible = $node->get_visible();
+
                 $node_type = $node->get_type();
 
                 $type_class = 'unknown';
@@ -182,9 +185,23 @@ class block_course_level_renderer extends plugin_renderer_base {
                         break;
                 }
                 
-                $display_node = $node->get_visible() || $this->showhiddencourses;
-
                 $attributes = array();
+
+                // is the node hidden?
+                if($visible == false) {
+                    //$attributes['class'] = 'hidden';
+
+                    $ual_api = ual_api::getInstance();
+                    if(isset($ual_api)) {
+                        $role = $ual_api->get_user_role($USER->username);
+
+                        if($role) {
+                           $showhiddencourses = (((strcmp($role, 'STAFF') == 0) && $this->showhiddencoursesstaff) || ((strcmp($role, 'STUDENT') == 0) && $this->showhiddencoursesstudents));
+                        }
+                    }
+                }
+
+                $display_node = $node->get_visible() || $showhiddencourses;
 
                 // Insert a span tag to allow us to insert an arrow...
                 $span = html_writer::tag('span', '');
@@ -201,7 +218,7 @@ class block_course_level_renderer extends plugin_renderer_base {
                             // Display the name but it's not clickable...
                             // TODO make this a configuration option...
                             if($this->showhiddencourses) {
-                            	$attributes['class'] = 'hidden';
+                                $attributes['class'] = 'hidden';
                             }
                             $content = html_writer::tag('i', $name, $attributes);
                         }
@@ -210,13 +227,45 @@ class block_course_level_renderer extends plugin_renderer_base {
                     }
                 } else {
                     // This is an expandable node...
-                    $content = html_writer::tag('div', $name.$span, $attributes);
+                    if($display_node) {
+                        if ($node_type == ual_course::COURSETYPE_ALLYEARS){
+                            if(($node->get_user_enrolled() == true) && $node->get_visible()) {
+                                $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
+                                $content = html_writer::link($moodle_url, $name, $attributes);
+                            }else {
+                                // Display the name but it's not clickable...
+                                // TODO make this a configuration option...
+                                if($this->showhiddencourses) {
+                                    $attributes['class'] = 'hidden';
+                                }
 
-                    if($indent != 0) {
-                        $attributes['class'] = 'expanded';
+                               // $content = html_writer::tag('i', $name, $attributes);
+                               // $content = html_writer::label($name, '#');
+                               // $content = html_writer::tag('div', $name.$span, $attributes);
+                                $content = html_writer::link('#', $name, $attributes);
+
+                            }
+                         // Append 'expanded' to the class type
+                            $type_class = $type_class . ' expanded';
+                        }elseif($node_type == ual_course::COURSETYPE_COURSE){
+                        $content = html_writer::tag('div', $name.$span, $attributes);
+                        }
+                        $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
+                    } else {
+                     // Expandable but hidden node.
+                       if ($node_type == ual_course::COURSETYPE_COURSE){
+                            $content = html_writer::tag('div', $name.$span, $attributes);
+                            // Get rid of 'overview' - the link that accesses the course.
+                            unset($children[0]);
+                            $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
+                        } else {
+                            $type_class = $type_class . ' expanded';
+                          //  $content = html_writer::tag('div', '', $attributes);
+                            $content = html_writer::link('', '', $attributes);
+                            $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
+                         // $result .= $this->htmllize_tree($children, $indent+1);
+                        }
                     }
-
-                    $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                 }
             }
         }
