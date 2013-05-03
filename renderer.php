@@ -218,7 +218,7 @@ class block_course_level_renderer extends plugin_renderer_base {
                             // Display the name but it's not clickable...
                             // TODO make this a configuration option...
                             if($this->showhiddencourses) {
-                            	$attributes['class'] = 'hidden';
+                                $attributes['class'] = 'hidden';
                             }
                             $content = html_writer::tag('i', $name, $attributes);
                         }
@@ -229,9 +229,22 @@ class block_course_level_renderer extends plugin_renderer_base {
                     // This is an expandable node...
                     if($display_node) {
                         if ($node_type == ual_course::COURSETYPE_ALLYEARS){
-                           $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
+                            if(($node->get_user_enrolled() == true) && $node->get_visible()) {
+                                $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
+                                $content = html_writer::link($moodle_url, $name, $attributes);
+                            }else {
+                                // Display the name but it's not clickable...
+                                // TODO make this a configuration option...
+                                if($this->showhiddencourses) {
+                                    $attributes['class'] = 'hidden';
+                                }
 
-                        $content = html_writer::link($moodle_url, $name, $attributes);
+                               // $content = html_writer::tag('i', $name, $attributes);
+                               // $content = html_writer::label($name, '#');
+                               // $content = html_writer::tag('div', $name.$span, $attributes);
+                                $content = html_writer::link('#', $name, $attributes);
+
+                            }
                          // Append 'expanded' to the class type
                             $type_class = $type_class . ' expanded';
                         }elseif($node_type == ual_course::COURSETYPE_COURSE){
@@ -240,9 +253,9 @@ class block_course_level_renderer extends plugin_renderer_base {
                         $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                     } else {
                      // Expandable but hidden node.
-                       // Get rid of 'overview' - the link that accesses the course.
-                        if ($node_type == ual_course::COURSETYPE_COURSE){
+                       if ($node_type == ual_course::COURSETYPE_COURSE){
                             $content = html_writer::tag('div', $name.$span, $attributes);
+                            // Get rid of 'overview' - the link that accesses the course.
                             unset($children[0]);
                             $result .= html_writer::tag('li', $content.$this->htmllize_tree($children, $indent+1), array('yuiConfig'=>json_encode($yuiconfig), 'class' => $type_class));
                         } else {
