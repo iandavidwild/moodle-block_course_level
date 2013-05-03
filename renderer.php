@@ -37,24 +37,18 @@ class block_course_level_renderer extends plugin_renderer_base {
     private $trimmode = block_course_level::TRIM_RIGHT;
     private $trimlength = 50;
     private $courseid = 0;
-    private $admin_tool_url = '';
-    private $admin_tool_magic_text = '';
-    private $showhiddencourses = false;
 
     /**
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $admin_tool_url, $admin_tool_magic_text, $showhiddencourses) {
+    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses) {
         $this->showcode = $showcode;
         $this->showmoodlecourses = $showmoodlecourses;
         $this->trimmode = $trimmode;
         $this->trimlength = $trimlength;
         $this->courseid = $courseid;
-        $this->admin_tool_url = $admin_tool_url;
-        $this->admin_tool_magic_text = $admin_tool_magic_text;
-		$this->showhiddencourses = $showhiddencourses;
-		
+
         return $this->render(new course_level_tree);
     }
 
@@ -66,7 +60,7 @@ class block_course_level_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_course_level_tree(course_level_tree $tree) {
-        global $CFG, $USER;
+        global $CFG;
 
         $displayed_something = false;
 
@@ -109,26 +103,6 @@ class block_course_level_renderer extends plugin_renderer_base {
         $attributes = array('class' => 'view-all');
         $span = html_writer::tag('span', '');
         $html .= html_writer::link($viewcourses_lnk, get_string('view_all_courses', 'block_course_level').$span, $attributes);
-
-        // Add 'Admin Tool' link (if necessary) UALMOODLE-161
-        // Display link to Admin DB tool?
-        $context = get_context_instance(CONTEXT_SYSTEM);
-        $display_admin_tool_link = has_capability('block/course_level:admin_db_link', $context);
-
-        if($display_admin_tool_link) {
-            // What is this user's role in MIS? Perform a strcmp for now as this is currently in development...
-            if(strcmp($tree->ual_user_role, 'STAFF') == 0) {
-                $button_text = get_string('admin_tool_link', 'block_course_level');
-                $redirect_url = $this->admin_tool_url;
-                $magic_text = $this->admin_tool_magic_text;
-                $html .="<div class='singlebutton'><form target='_blank' action='{$redirect_url}' method='post'>
-                         <input type='hidden' name='url' value='{$redirect_url}'/>
-                         <input type='hidden' name='username' value='{$USER->username}'/>
-                         <input type='hidden' name='magic' value='{$magic_text}'/>
-                         <input type='submit' id='admin_tool_submit' value='{$button_text}'/>
-                         </form></div>";
-            }
-        }
 
         return $html;
     }
@@ -181,8 +155,6 @@ class block_course_level_renderer extends plugin_renderer_base {
                         $type_class = 'unit';
                         break;
                 }
-                
-                $display_node = $node->get_visible() || $this->showhiddencourses;
 
                 $attributes = array();
 
@@ -190,19 +162,16 @@ class block_course_level_renderer extends plugin_renderer_base {
                 $span = html_writer::tag('span', '');
 
                 if ($children == null) {
-                    if($display_node) {
+                    if($node->get_visible() == true) {
                         // Only write out the node if the course it represents is visible
                         $attributes['title'] = $name;
 
-                        if(($node->get_user_enrolled() == true) && $node->get_visible()) {
+                        if($node->get_user_enrolled() == true) {
                             $moodle_url = $CFG->wwwroot.'/course/view.php?id='.$node->get_moodle_course_id();
                             $content = html_writer::link($moodle_url, $name, $attributes);
                         } else {
                             // Display the name but it's not clickable...
                             // TODO make this a configuration option...
-                            if($this->showhiddencourses) {
-                            	$attributes['class'] = 'hidden';
-                            }
                             $content = html_writer::tag('i', $name, $attributes);
                         }
 

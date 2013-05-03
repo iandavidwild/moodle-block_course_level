@@ -20,7 +20,7 @@
  *
  * @package    block
  * @subpackage course_level
- * @copyright  2012-13 University of London Computer Centre
+ * @copyright  2012 University of London Computer Centre
  * @author     Ian Wild {@link http://moodle.org/user/view.php?id=325899}
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -29,4 +29,4 @@ $plugin->version = 2013021102;
 $plugin->maturity = MATURITY_ALPHA;
 $plugin->requires = 2011070100; // 2.1.
 $plugin->component = 'block_course_level';
-$plugin->release = '0.2 (Build: 2013021102)';
+$plugin->release = '0.1 (Build: 2012090501)';

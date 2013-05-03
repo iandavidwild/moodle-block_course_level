@@ -96,10 +96,10 @@ require("tabs.php");
 
 // Should use this variable so that we don't break stuff every time a variable is added or changed.
 $baseurl = new moodle_url('/blocks/course_level/view.php', array(
-    'contextid' => s($context->id),
-    'id' => s($course->id),
-    'perpage' => s($perpage),
-    'tab' => s($tab),
+    'contextid' => $context->id,
+    'id' => $course->id,
+    'perpage' => $perpage,
+    'tab' => $tab,
     'search' => s($search)));
 
 if ($tab == PROGRAMMES_VIEW) {
@@ -107,8 +107,8 @@ if ($tab == PROGRAMMES_VIEW) {
     echo '<div class="programmelist">';
 
     // Search...
-    echo '<div class="filter"><form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.s($course->id)
-            .'" /><input type="hidden" name="tab" value="'.s($tab).'" />';
+    echo '<div class="filter"><form action="view.php" class="searchform"><div><input type="hidden" name="id" value="'.$course->id
+            .'" /><input type="hidden" name="tab" value="'.$tab.'" />';
     echo '<label for="search">' . get_string('programmesearch', 'block_course_level') . ' </label>';
     echo '<input type="text" id="search" name="search" value="'.s($search).'" />&nbsp;<input type="submit" value="'
             .get_string('search').'" /></div></form></div>'."\n";
