@@ -106,12 +106,20 @@ class course_level_tree implements renderable {
                     $reference_courses[$course_code] = $course;
 
                     // Is this course an orphan?
-                    if(strlen($course->get_parent()) == 0) {
+                    $parent = $course->get_parent();
+                    if( strlen($parent) === 0 ) {
                         $orphaned_courses[] = $course;
                     } else {
-                        $parent = $reference_programmes[$course->get_parent()];
-                        if(!empty($parent)) {
-                            $parent->adopt_child($course);
+                        $course_parent = $course->get_parent();
+                        if(isset($reference_programmes[$course_parent])) {
+                            $parent = $reference_programmes[$course->get_parent()];
+                            if(!empty($parent)) {
+                                $parent->adopt_child($course);
+                            } else {
+                                $orphaned_courses[$course_code] = $course;
+                            }
+                        } else {
+                            $orphaned_courses[$course_code] = $course;
                         }
                     }
                 }
@@ -128,7 +136,8 @@ class course_level_tree implements renderable {
                     $reference_units[$unit_code] = $unit;
 
                     // Is this unit an orphan?
-                    if(strlen($unit->get_parent()) == 0) {
+                    $parent = $unit->get_parent();
+                    if( strlen($parent) === 0 ) {
                         $orphaned_units[] = $unit;
                     } else {
                         $unit_parent = $unit->get_parent();
@@ -136,7 +145,11 @@ class course_level_tree implements renderable {
                             $parent = $reference_courses[$unit_parent];
                             if(!empty($parent)) {
                                 $parent->adopt_child($unit);
+                            } else {
+                                $orphaned_units[$unit_code] = $unit;
                             }
+                        } else {
+                            $orphaned_units[$unit_code] = $unit;
                         }
                     }
                 }
