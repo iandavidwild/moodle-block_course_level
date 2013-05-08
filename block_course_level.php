@@ -121,6 +121,10 @@ class block_course_level extends block_base {
             $this->title = $this->config->title;
         }
 
+        // Do we show hidden courses?
+        $context = get_context_instance(CONTEXT_SYSTEM);
+        $showhiddencourses = has_capability('block/course_level:show_hidden_courses', $context);
+
         $this->content = new stdClass();
 
         $this->content->text = '';
@@ -136,7 +140,7 @@ class block_course_level extends block_base {
             if(!$courseid) {
                 $courseid = 1;  // Assume we are on the site front page
             }
-            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses);
+            $this->content->text = $renderer->course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $showhiddencourses);
             $this->content->footer = '';
 
         }
