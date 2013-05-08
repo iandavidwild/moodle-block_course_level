@@ -158,13 +158,19 @@ class block_course_level_renderer extends plugin_renderer_base {
                         break;
                 }
 
+                // Is this node visible?
+                $visible = $node->get_visible();
+                if(!$visible) {
+                    $visible = $this->showhiddencourses;
+                }
+
                 $attributes = array();
 
                 // Insert a span tag to allow us to insert an arrow...
                 $span = html_writer::tag('span', '');
 
                 if ($children == null) {
-                    if($node->get_visible() == true) {
+                    if($visible == true) {
                         // Only write out the node if the course it represents is visible
                         $attributes['title'] = $name;
 
