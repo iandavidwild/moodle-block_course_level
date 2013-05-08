@@ -37,17 +37,19 @@ class block_course_level_renderer extends plugin_renderer_base {
     private $trimmode = block_course_level::TRIM_RIGHT;
     private $trimlength = 50;
     private $courseid = 0;
+    private $showhiddencourses = true;
 
     /**
      * Prints course level tree view
      * @return string
      */
-    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses) {
+    public function course_level_tree($showcode, $trimmode, $trimlength, $courseid, $showmoodlecourses, $showhiddencourses) {
         $this->showcode = $showcode;
         $this->showmoodlecourses = $showmoodlecourses;
         $this->trimmode = $trimmode;
         $this->trimlength = $trimlength;
         $this->courseid = $courseid;
+        $this->showhiddencourses = $showhiddencourses;
 
         return $this->render(new course_level_tree);
     }
