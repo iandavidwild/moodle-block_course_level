@@ -172,6 +172,7 @@ class course_level_tree implements renderable {
                                 $course->set_idnumber($orphaned_course->get_idnumber());
                                 $course->set_moodle_course_id($orphaned_course->get_moodle_course_id());
                                 $course->set_user_enrolled($orphaned_course->get_user_enrolled());
+                                $course->set_visible($orphaned_course->get_visible());
                                 unset($orphaned_courses[$elementkey]);
                             }
                         }
@@ -269,6 +270,7 @@ class course_level_tree implements renderable {
                         $new_course->set_fullname($moodle_course->fullname);
                         $mis = new ual_mis();
                         $new_course->set_user_enrolled($mis->get_enrolled($USER->id, $moodle_course->id));
+                        $new_course->set_visible($moodle_course->visible);
                     }
 
                     $result[] = $new_course;
