@@ -80,3 +80,6 @@ $string['programme_courses']     = 'Show courses';
 $string['homepage']              = 'Overview';
 $string['missing_homepage']      = 'Missing Course Homepage!';
 
+// Capabilities
+$string['course_level:show_hidden_courses'] = 'Show hidden courses';
+
