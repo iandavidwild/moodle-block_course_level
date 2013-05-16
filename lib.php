@@ -106,21 +106,21 @@ class course_level_tree implements renderable {
                     $reference_courses[$course_code] = $course;
 
                     // Is this course an orphan?
-                    $parent = $course->get_parent();
-                    if( strlen($parent) === 0 ) {
-                        $orphaned_courses[] = $course;
-                    } else {
-                        $course_parent = $course->get_parent();
-                        if(isset($reference_programmes[$course_parent])) {
-                            $parent = $reference_programmes[$course->get_parent()];
-                            if(!empty($parent)) {
-                                $parent->adopt_child($course);
-                            } else {
-                                $orphaned_courses[$course_code] = $course;
+                    $is_orphaned = true;
+                    $parents = $course->get_parents();
+                    if( !empty($parents) ) {
+                        foreach($parents as $parent) {
+                            if(isset($reference_programmes[$parent])) {
+                                $parent_course = $reference_programmes[$parent];
+                                if(!empty($parent_course)) {
+                                    $parent_course->adopt_child($course);
+                                    $is_orphaned = false;
+                                }
                             }
-                        } else {
-                            $orphaned_courses[$course_code] = $course;
                         }
+                    }
+                    if($is_orphaned) {
+                        $orphaned_courses[] = $course;
                     }
                 }
             }
@@ -136,21 +136,21 @@ class course_level_tree implements renderable {
                     $reference_units[$unit_code] = $unit;
 
                     // Is this unit an orphan?
-                    $parent = $unit->get_parent();
-                    if( strlen($parent) === 0 ) {
-                        $orphaned_units[] = $unit;
-                    } else {
-                        $unit_parent = $unit->get_parent();
-                        if(isset($reference_courses[$unit_parent])) {
-                            $parent = $reference_courses[$unit_parent];
-                            if(!empty($parent)) {
-                                $parent->adopt_child($unit);
-                            } else {
-                                $orphaned_units[$unit_code] = $unit;
+                    $is_orphaned = true;
+                    $parents = $unit->get_parents();
+                    if(!empty($parents) ) {
+                        foreach($parents as $parent) {
+                            if(isset($reference_courses[$parent])) {
+                                $unit_parent = $reference_courses[$parent];
+                                if(!empty($unit_parent)) {
+                                    $unit_parent->adopt_child($unit);
+                                    $is_orphaned = false;
+                                }
                             }
-                        } else {
-                            $orphaned_units[$unit_code] = $unit;
                         }
+                    }
+                    if($is_orphaned) {
+                        $orphaned_units[] = $unit;
                     }
                 }
             }
